@@ -4,32 +4,36 @@ Prototype hệ thống **Sinh bài tập tự động & Phân tích lỗ hổng 
 
 ---
 
-## 🛠️ Trạng thái Prototype (Prototype Matrix)
+## 🛠️ Bảng Ma Trận Tính Năng Prototype (Prototype Matrix)
 
 | Thành phần | Trạng thái | Ghi chú |
 |---|---|---|
-| **Quiz Generator** | **Working (Thật)** | Gọi LLM phân tích transcript bài giảng, sinh bài tập trắc nghiệm, điền khuyết, tự luận ngắn kèm trích dẫn `[transcript_id:line]`. |
-| **Auto Grader** | **Working (Thật)** | Tự động chấm bài trắc nghiệm + bài tự luận ngắn của học viên dựa trên đáp án chuẩn và lý giải chi tiết. |
-| **Knowledge Gap Analytics** | **Working (Thật)** | Phân tích tỉ lệ trả lời đúng/sai của lớp, xuất biểu đồ/báo cáo bản đồ lỗ hổng kiến thức. |
-| **Giao diện LMS** | **Mock** | Giả lập luồng nhận bài làm qua RESTful API / CLI. |
+| **Quiz Generator Agent** | **Working (Thật 100%)** | Gọi LLM/RAG phân tích transcript bài giảng, sinh bài tập trắc nghiệm, điền khuyết, tự luận ngắn kèm trích dẫn `[transcript_id:Lxx-Lyy]`. |
+| **Auto Grader Agent** | **Working (Thật 100%)** | Chấm bài trắc nghiệm + tự luận ngắn dựa trên rubric keywords, ngữ nghĩa và phòng chống Prompt Injection gian lận. |
+| **Knowledge Gap Analytics** | **Working (Thật 100%)** | Tổng hợp điểm số lớp học, xuất Báo cáo Bản đồ Lỗ hổng Kiến thức (Cao/Vừa/Đạt) & danh sách học viên cần hỗ trợ 1-on-1. |
+| **LLM Denoising Engine** | **Working (Thật 100%)** | Lọc rác transcript bài giảng thô (chào hỏi, giải lao, hành chính). |
+| **Vector DB & SQLite DB** | **Working (Thật 100%)** | ChromaDB cho RAG Vector Embeddings và SQLite DB cho Quiz Bank & Submissions. |
+| **Next.js Web Frontend** | **Working (Thật 100%)** | Web Portal tại `frontend/` cho Học viên & Dashboard Giảng viên / TA. |
 
 ---
 
-## ⚡ Hướng dẫn Chạy Prototype
+## ⚡ Hướng Dẫn Chạy Nhanh (Pip)
+
+Xem hướng dẫn chi tiết toàn bộ các bước khởi chạy tại file **[RUNNING_GUIDE.md](../RUNNING_GUIDE.md)**.
 
 ```bash
-# 1. Di chuyển vào thư mục codebase
-cd codebase
+# 1. Cài đặt các thư viện Python:
+pip install -r codebase/requirements.txt
 
-# 2. Tạo virtualenv và cài đặt dependencies
-python -m venv .venv
-source .venv/bin/activate  # Hoặc .venv\Scripts\Activate.ps1 trên Windows
-pip install -r requirements.txt
+# 2. Chạy CLI Demo (Test luồng nhanh):
+python codebase/src/main.py
 
-# 3. Tạo file .env và điền OPENAI_API_KEY
-cp .env.example .env
+# 3. Chạy Evaluation Suite (20 cases):
+python eval/run_eval.py
 
-# 4. Khởi chạy CLI Demo hoặc API Server
-python src/main.py --demo      # Chạy thử nghiệm luồng từ sinh bài tập -> chấm bài -> báo cáo
-python src/main.py --server    # Chạy Web API Server tại http://localhost:8000
+# 4. Khởi chạy REST API Server:
+python codebase/src/main.py --server
+
+# 5. Khởi chạy Next.js Web Frontend:
+cd frontend && npm run dev
 ```
