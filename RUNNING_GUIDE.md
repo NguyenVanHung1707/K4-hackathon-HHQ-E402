@@ -1,27 +1,59 @@
 # 🚀 Hướng Dẫn Vận Hành & Chạy Hệ Thống VLearn EduAI
 
-Tài liệu này hướng dẫn chi tiết các bước cài đặt thư viện và khởi chạy từ **CLI Demo**, **Evaluation Suite**, **Backend REST API Server** đến **Next.js Web Frontend**.
+Tài liệu này hướng dẫn chi tiết các bước cài đặt môi trường ảo Python (`venv`), cài đặt thư viện và khởi chạy từ **CLI Demo**, **Evaluation Suite**, **Backend REST API Server** đến **Next.js Web Frontend**.
 
 ---
 
 ## 📋 1. Yêu Cầu Môi Trường (Prerequisites)
 
-- **Python:** phiên bản `3.10` trở lên (đi kèm `pip`).
+- **Python:** phiên bản `3.10` trở lên (đi kèm `pip` và mô-đun `venv`).
 - **Node.js:** phiên bản `18.0` trở lên (đi kèm `npm`).
 
 ---
 
-## 📦 2. Cài Đặt Tất Cả Thư Viện (Cài Một Lần Đầu)
+## 📦 2. Cài Đặt Môi Trường & Thư Viện (Cài Một Lần Đầu)
 
-Mở Terminal tại thư mục gốc của dự án (`K4-hackathon-HHQ-E402/`) và thực hiện 2 lệnh sau:
+Mở Terminal tại thư mục gốc của dự án (`K4-hackathon-HHQ-E402/`) và thực hiện các bước sau:
 
-### 🔹 Bước 2.1: Cài đặt thư viện Backend Python (pip)
+### 🔹 Bước 2.1: Tạo và Kích Hoạt Môi Trường Ảo (Python venv)
+
+Việc tạo Virtual Environment (`.venv`) giúp cô lập các thư viện của dự án, tránh xung đột hệ thống.
+
+#### 🪟 Trên Windows (PowerShell / Command Prompt):
+```powershell
+# 1. Tạo môi trường ảo tên là .venv
+python -m venv .venv
+
+# 2. Kích hoạt môi trường ảo trên PowerShell
+.venv\Scripts\Activate.ps1
+
+# (Nếu dùng Command Prompt / cmd.exe):
+# .venv\Scripts\activate.bat
+```
+> 💡 *Mẹo trên Windows:* Nếu gặp lỗi `Execution_Policies` khi chạy lệnh Activate trên PowerShell, hãy mở PowerShell bằng quyền Administrator và chạy lệnh:  
+> `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`
+
+#### 🍎 🐧 Trên macOS / Linux / Git Bash:
+```bash
+# 1. Tạo môi trường ảo tên là .venv
+python3 -m venv .venv
+
+# 2. Kích hoạt môi trường ảo
+source .venv/bin/activate
+```
+
+---
+
+### 🔹 Bước 2.2: Cài đặt thư viện Backend Python (pip)
+Sau khi đã kích hoạt thành công môi trường ảo `(.venv)`:
+
 ```bash
 pip install -r codebase/requirements.txt
 ```
-*(Lưu ý: Nếu dùng môi trường ảo venv, hãy khởi tạo: `python -m venv .venv` rồi kích hoạt `.venv\Scripts\activate` trên Windows hoặc `source .venv/bin/activate` trên Linux/Mac trước khi pip install).*
 
-### 🔹 Bước 2.2: Cài đặt thư viện Frontend Next.js (npm)
+---
+
+### 🔹 Bước 2.3: Cài đặt thư viện Frontend Next.js (npm)
 ```bash
 cd frontend
 npm install
@@ -35,7 +67,7 @@ cd ..
 Tạo một file có tên **`.env`** tại thư mục gốc của dự án (hoặc sao chép từ file mẫu `.env.example`):
 
 ```bash
-# Trên Linux/Mac:
+# Trên Linux/Mac/Git Bash:
 cp .env.example .env
 
 # Trên Windows (PowerShell):
@@ -74,7 +106,7 @@ python codebase/src/main.py
 ```bash
 python eval/run_eval.py
 ```
-👉 Kết quả đánh giá sẽ được ghi tự động vào file [eval/results.md](file:///d:/VinAI/K4-hackathon-HHQ-E402/eval/results.md).
+👉 Kết quả đánh giá sẽ được ghi tự động vào file [eval/results.md](file:///e:/hung/VinAI/Lab/Lab5/K4-hackathon-HHQ-E402/eval/results.md).
 
 ---
 
@@ -116,7 +148,7 @@ Giao diện Web bao gồm 2 chế độ chính:
 
 ---
 
-### 📊 2. Dashboard Giảng Viên / TA (Lecturer & TA Dashboard)
+## 📊 2. Dashboard Giảng Viên / TA (Lecturer & TA Dashboard)
 1. **Xem Báo cáo Tổng quan:** Theo dõi Điểm trung bình cả lớp, Số lượt học viên nộp bài và Số học viên yếu cần hỗ trợ 1-on-1.
 2. **Bản đồ Lỗ hổng Kiến thức (Class Knowledge Gap Map):** Phân tích tỷ lệ hiểu đúng theo từng chủ đề và mức độ hổng kiến thức (*Hổng Cao ⚠️⚠️⚠️*, *Hổng Vừa ⚠️*, *Đạt ✅*).
 3. **Danh sách Học viên Cần Hỗ trợ:** Hiển thị danh sách học viên đạt điểm dưới $60\%$ kèm nút gửi nhắn tin hỗ trợ 1-on-1.
