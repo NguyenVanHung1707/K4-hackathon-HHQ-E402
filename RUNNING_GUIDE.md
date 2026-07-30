@@ -1,17 +1,36 @@
-# 🚀 Hướng Dẫn Vận Hành & Chạy Hệ Thống VLearn EduAI (Sử Dụng Pip)
+# 🚀 Hướng Dẫn Vận Hành & Chạy Hệ Thống VLearn EduAI
 
-Tài liệu này hướng dẫn chi tiết các bước khởi chạy từ **CLI Demo**, **Evaluation Suite**, **Backend REST API Server** đến **Next.js Web Frontend** sử dụng công cụ quản lý thư viện Python tiêu chuẩn (`pip`).
+Tài liệu này hướng dẫn chi tiết các bước cài đặt thư viện và khởi chạy từ **CLI Demo**, **Evaluation Suite**, **Backend REST API Server** đến **Next.js Web Frontend**.
 
 ---
 
 ## 📋 1. Yêu Cầu Môi Trường (Prerequisites)
 
-- **Python:** phiên bản `3.10` trở lên (đã tích hợp sẵn `pip`).
+- **Python:** phiên bản `3.10` trở lên (đi kèm `pip`).
 - **Node.js:** phiên bản `18.0` trở lên (đi kèm `npm`).
 
 ---
 
-## 🔑 2. Cấu Hình File `.env` (Biến Môi Trường)
+## 📦 2. Cài Đặt Tất Cả Thư Viện (Cài Một Lần Đầu)
+
+Mở Terminal tại thư mục gốc của dự án (`K4-hackathon-HHQ-E402/`) và thực hiện 2 lệnh sau:
+
+### 🔹 Bước 2.1: Cài đặt thư viện Backend Python (pip)
+```bash
+pip install -r codebase/requirements.txt
+```
+*(Lưu ý: Nếu dùng môi trường ảo venv, hãy khởi tạo: `python -m venv .venv` rồi kích hoạt `.venv\Scripts\activate` trên Windows hoặc `source .venv/bin/activate` trên Linux/Mac trước khi pip install).*
+
+### 🔹 Bước 2.2: Cài đặt thư viện Frontend Next.js (npm)
+```bash
+cd frontend
+npm install
+cd ..
+```
+
+---
+
+## 🔑 3. Cấu Hình File `.env` (Biến Môi Trường)
 
 Tạo một file có tên **`.env`** tại thư mục gốc của dự án (hoặc sao chép từ file mẫu `.env.example`):
 
@@ -38,7 +57,7 @@ TEMPERATURE=0.2
 
 ---
 
-## ⚡ 3. Các Bước Khởi Chạy Hệ Thống
+## ⚡ 4. Các Bước Khởi Chạy Hệ Thống
 
 ### 🔹 Bước 1: Chạy CLI Demo (Kiểm tra lát cắt chạy thật)
 Mô phỏng toàn bộ luồng: **Lọc rác transcript $\rightarrow$ AI sinh quiz $\rightarrow$ Học viên nộp bài & Auto Grader (chống Prompt Injection) $\rightarrow$ Xuất Báo cáo Lỗ hổng Kiến thức**.
@@ -74,20 +93,14 @@ python codebase/src/main.py --server
 Mở một cửa sổ Terminal mới để khởi chạy ứng dụng web:
 
 ```bash
-# Di chuyển vào thư mục frontend
 cd frontend
-
-# Cài đặt các gói phụ thuộc (nếu chưa cài)
-npm install
-
-# Khởi chạy server phát triển Next.js
 npm run dev
 ```
 👉 Truy cập Giao diện Web Portal tại: **`http://localhost:3000`**
 
 ---
 
-## 🌐 4. Hướng Dẫn Sử Dụng Giao Diện Web (`http://localhost:3000`)
+## 🌐 5. Hướng Dẫn Sử Dụng Giao Diện Web (`http://localhost:3000`)
 
 Giao diện Web bao gồm 2 chế độ chính:
 
@@ -111,7 +124,7 @@ Giao diện Web bao gồm 2 chế độ chính:
 
 ---
 
-## 🗄️ 5. Cơ Sở Dữ Liệu & Lưu Trữ (Database Structure)
+## 🗄️ 6. Cơ Sở Dữ Liệu & Lưu Trữ (Database Structure)
 
 - **SQLite Database (`data/db/vlearn.db`):** Lưu trữ bền vững Ngân hàng bài tập (`quizzes`) và Lịch sử bài nộp của học viên (`submissions`).
 - **ChromaDB Vector Store (`data/chroma/`):** Lưu trữ Embeddings tri thức mỏ neo từ Slide Core và ngữ cảnh giải thích từ Transcript.
