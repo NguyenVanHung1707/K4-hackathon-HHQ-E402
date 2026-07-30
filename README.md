@@ -51,6 +51,16 @@ K4-hackathon-HHQ-E402/
 
 ---
 
+## 📂 Nguồn Dữ Liệu Bài Giảng (`data/` Directory)
+
+Dữ liệu đầu vào của dự án được tổ chức chi tiết trong thư mục `data/`:
+- **Cấu trúc theo Ngày học (`DayXX/`):** Mỗi ngày học (`Day01/`, `Day02/`, ...) được phân chia thành 2 thư mục con:
+  - `Slide/`: Chứa các file Slide bài giảng PDF (`d1-slide-hackathon.pdf`, `d2-slide-hackathon.pdf`).
+  - `Script/`: Chứa các bản trích yếu transcript bài giảng đã được làm sạch (`transcript-01-clean.md`, `transcript-02-clean.md`, ...).
+- **Gói VLearn Pack (`vlearn-pack/`):** Chứa dữ liệu chatlog thực tế (`chatlog/`) đã ẩn danh của 1.000+ học viên dùng để phân tích điểm yếu (Persona & Weakness Extractor).
+
+---
+
 ## ⚡ Quick Start — Trải Nghiệm Prototype
 
 ```bash

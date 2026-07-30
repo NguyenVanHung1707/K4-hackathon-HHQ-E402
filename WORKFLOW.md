@@ -65,9 +65,17 @@ graph TD
 ## 📑 3. Giải Thích Chi Tiết Các Khối Trong Workflow
 
 ### 📥 Khối 1: Nguồn Dữ Liệu Đầu Vào (Source Nodes)
-- **`A1 (Slide PDF Text)`**: Dữ liệu Slide bài giảng dạng PDF/Text — chứa các định nghĩa cốt lõi, công thức, khung kiến thức chuẩn (Anchor Knowledge).
-- **`A2 (Lecture Transcript)`**: Transcript bài giảng dạng văn bản thô (ghi âm lời giảng) — chứa các ví dụ minh họa, lời giải thích chi tiết và phân tích sâu của giảng viên.
-- **`A3 (User Chatlog CSV)`**: Nhật ký trò chuyện giữa học viên và AI Tutor/TA — chứa dữ liệu về các câu hỏi học viên hay thắc mắc, các điểm hay bị hiểu sai hoặc bị kẹt.
+- **`A1 (Slide PDF Text)`**: Dữ liệu Slide bài giảng dạng PDF trích xuất từ thư mục `data/` theo từng buổi học (ví dụ: `data/Day01/Slide/`, `data/Day02/Slide/`) — chứa các định nghĩa cốt lõi, công thức, khung kiến thức chuẩn (Anchor Knowledge).
+- **`A2 (Lecture Transcript)`**: Transcript bài giảng dạng văn bản sạch trích xuất từ thư mục `data/` theo từng buổi học (ví dụ: `data/Day01/Script/`, `data/Day02/Script/`) — chứa các ví dụ minh họa, lời giải thích chi tiết và phân tích sâu của giảng viên.
+- **`A3 (User Chatlog CSV)`**: Nhật ký trò chuyện giữa học viên và AI Tutor/TA trích xuất từ `data/vlearn-pack/chatlog/` — chứa dữ liệu về các câu hỏi học viên hay thắc mắc, các điểm hay bị hiểu sai hoặc bị kẹt.
+
+> 📌 **Chú thích Cấu trúc Dữ liệu (`data/` Directory Structure):**  
+> Toàn bộ dữ liệu đầu vào được tổ chức bài bản trong thư mục `data/`:
+> - Thư mục `data/` được phân chia theo từng ngày học (ví dụ: `Day01/`, `Day02/`, ...).
+> - Trong mỗi thư mục Ngày (`DayXX/`) bao gồm 2 phần chính:
+>   1. **`Slide/`**: Chứa file slide bài giảng PDF tương ứng (`d1-slide-hackathon.pdf`, `d2-slide-hackathon.pdf`, ...).
+>   2. **`Script/`**: Chứa các bản trích yếu transcript bài giảng đã làm sạch (`transcript-01-clean.md`, `transcript-02-clean.md`, ...).
+> - Ngoài ra, thư mục `data/vlearn-pack/` cung cấp tập dữ liệu `chatlog/` đã ẩn danh của 1.000+ học viên dùng để khai phá điểm yếu (Persona & Weakness Extractor).
 
 ---
 
