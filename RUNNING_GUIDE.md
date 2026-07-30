@@ -11,15 +11,30 @@ Tài liệu này hướng dẫn chi tiết các bước khởi chạy từ **CLI
 
 ---
 
-## ⚙️ 2. Cài Đặt Thư Viện Python (Cài Một Lần Đầu)
+## 🔑 2. Cấu Hình File `.env` (Biến Môi Trường)
 
-Mở Terminal tại thư mục gốc của dự án (`K4-hackathon-HHQ-E402/`) và chạy lệnh:
+Tạo một file có tên **`.env`** tại thư mục gốc của dự án (hoặc sao chép từ file mẫu `.env.example`):
 
 ```bash
-pip install -r codebase/requirements.txt
+# Trên Linux/Mac:
+cp .env.example .env
+
+# Trên Windows (PowerShell):
+copy .env.example .env
 ```
 
-*(Lưu ý: Bạn cũng có thể khởi tạo môi trường ảo Python venv nếu muốn: `python -m venv .venv` sau đó kích hoạt `.venv\Scripts\activate` trên Windows hoặc `source .venv/bin/activate` trên Linux/Mac).*
+### Nội dung cấu hình chi tiết trong file `.env`:
+```env
+# 1. API Key của OpenAI (Dùng để gọi LLM sinh bài tập & chấm tự luận)
+# 💡 LƯU Ý: Nếu chưa có key hoặc để trống, hệ thống vẫn chạy 100% bình thường bằng Fallback RAG Engine mà KHÔNG bị lỗi!
+OPENAI_API_KEY=sk-proj-your-openai-api-key-here
+
+# 2. Tên mô hình LLM sử dụng (Mặc định: gpt-4o-mini)
+LLM_MODEL=gpt-4o-mini
+
+# 3. Độ liều/sáng tạo khi sinh câu hỏi (Mặc định: 0.2)
+TEMPERATURE=0.2
+```
 
 ---
 
