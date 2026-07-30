@@ -9,14 +9,13 @@
 
 | Mã HV | Họ và Tên | Vai trò | Phân công công việc (Tên phần đảm nhận) |
 |---|---|---|---|
-| **HV001** | **Nguyễn Văn Hùng** | Trưởng Nhóm | AI Spec (`spec.md`), Prompt & Engine LangGraph Generator (`codebase/src/generator.py`), Đóng góp Golden Set (`eval/`). |
-| **HV002** | **Đào Thị B** | Member | Xây dựng bộ kiểm thử Golden Set (`eval/golden_set.json`), Chạy Eval 2 lượt & Tổng hợp báo cáo (`eval/results.md`). |
-| **HV003** | **Trần Văn C** | Member | Phát triển Auto Grader (`codebase/src/grader.py`), Engine Báo cáo Lỗ hổng (`codebase/src/analytics.py`), API Server (`codebase/src/api.py`). |
-| **HV004** | **Lê Thị D** | Member | Validation Log (`validation/user_test_log.md`), Slide Trình bày (`demo-slides.md`), Phim Demo & Documentations. |
+| **2A202601284** | **Nguyễn Văn Hưng** | Trưởng Nhóm | AI Spec (`spec.md`), Prompt & Engine LangGraph Generator (`codebase/src/generator.py`), Đóng góp Golden Set (`eval/`). |
+| **2A202601108** | **Đặng Minh Quang** | Thành viên | Xây dựng bộ kiểm thử Golden Set (`eval/golden_set.json`), Chạy Eval 2 lượt & Báo cáo kết quả (`eval/results.md`), User Validation Log (`validation/user_test_log.md`). |
+| **2A202601372** | **Nhữ Văn Hùng** | Thành viên | Phát triển Auto Grader (`codebase/src/grader.py`), Engine Báo cáo Lỗ hổng (`codebase/src/analytics.py`), API Server (`codebase/src/api.py`), Slide Demo (`demo-slides.md`). |
 
 ---
 
-## 🎯 🎯 Lát Cắt Dự Án (One-Sentence Slice)
+## 🎯 Lát Cắt Dự Án (One-Sentence Slice)
 
 > *"Giảng viên đưa transcript bài giảng -> AI phân tích nội dung để tự động sinh 5 câu bài tập (trắc nghiệm, điền khuyết, tự luận) kèm đáp án & trích dẫn -> Học viên nộp bài -> AI chấm điểm tự luận & xuất Báo cáo lỗ hổng kiến thức của lớp."*
 
@@ -45,10 +44,9 @@ K4-hackathon-HHQ-E402/
 ├── validation/             ← Nhật ký thử nghiệm với người dùng
 │   └── user_test_log.md    ← Log feedback nguyên văn từ 5 người dùng ngoài nhóm
 └── reflection/             ← Reflection cá nhân (mỗi người 1 file)
-    ├── hung_nguyen.md
-    ├── dao_thi_b.md
-    ├── tran_van_c.md
-    └── le_thi_d.md
+    ├── hung_nguyen_2A202601284.md
+    ├── quang_dang_2A202601108.md
+    └── hung_nhu_2A202601372.md
 ```
 
 ---

@@ -145,10 +145,9 @@
 ## §8. Phân công & Kế hoạch
 
 - **Phân công nhóm (Nhóm 04):**
-  - *Nguyễn Văn Hùng (Trưởng nhóm):* Phụ trách AI Spec, Thiết kế Prompt & LangGraph Agent sinh quiz (`codebase/src/generator.py`).
-  - *Thành viên 2 (Đào Thị B):* Phụ trách Xây dựng Golden Set & Chạy Eval (`eval/`).
-  - *Thành viên 3 (Trần Văn C):* Phụ trách Engine Chấm tự luận & Phân tích lỗ hổng (`codebase/src/grader.py` & `analytics.py`).
-  - *Thành viên 4 (Lê Thị D):* Phụ trách Giao diện Prototype CLI/API, User Validation Log (`validation/`) & Slide Demo.
+  - *Nguyễn Văn Hưng (2A202601284 - Trưởng nhóm):* Phụ trách AI Spec (`spec.md`), Prompt & Engine LangGraph Generator (`codebase/src/generator.py`), Đóng góp Golden Set (`eval/`).
+  - *Đặng Minh Quang (2A202601108):* Phụ trách Xây dựng bộ kiểm thử Golden Set (`eval/golden_set.json`), Chạy Eval 2 lượt & Báo cáo kết quả (`eval/results.md`), User Validation Log (`validation/user_test_log.md`).
+  - *Nhữ Văn Hùng (2A202601372):* Phụ trách Auto Grader Engine (`codebase/src/grader.py`), Knowledge Gap Analytics (`codebase/src/analytics.py`), API Server (`codebase/src/api.py`), Slide Demo (`demo-slides.md`).
 
 - **Willing users (≥3 tên thật ngoài nhóm):**
   1. *Nguyễn Văn X* (TA Khoá K4 - Discord: `@nguyenvanx_ta`)
