@@ -1,0 +1,6 @@
+{
+  "name": "VLearn",
+  "description": "Hệ thống học tập thông minh VLearn cho Giáo viên và Sinh viên với AI Tutor và AI Quiz Generator",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
