@@ -131,23 +131,44 @@ graph TD
 
 ---
 
-## 🛠️ 5. Kiến Trúc Công Nghệ & Lựa Chọn Database (Micro-Stack Strategy)
+## 🛠️ 5. Kiến Trúc Công Nghệ & Danh Mục Tech Stack (Micro-Stack Strategy)
 
-Hệ thống ưu tiên phương án **"Micro-stack" cấp độ Demo/Đồ án** (Nhanh, dễ setup, 100% Python-native):
-- **Ngôn ngữ phát triển chính:** Python
-- **Lựa chọn Database:** **ChromaDB** (cho Vector Storage) + **SQLite** (cho Relational Data & JSON Storage)
+Hệ thống ưu tiên phương án **"Micro-stack" cấp độ Demo/Đồ án Hackathon** (Nhanh, hiệu năng cao, dễ setup, tích hợp trơn tru giữa FastAPI Backend và Next.js Frontend).
 
-### 💡 Lý do lựa chọn Micro-stack
-Nếu dự án của bạn là đồ án chạy trên máy cá nhân (Local) và Frontend dùng **Streamlit** hoặc **FastAPI UI**, cấu trúc này giúp bạn chạy toàn bộ hệ thống mà **không cần cài đặt thêm bất kỳ phần mềm máy chủ database nào** (như PostgreSQL, MySQL hay Pinecone).
+### 🧰 Chi Tiết Danh Mục Công Nghệ (Tech Stack Breakdown)
 
-1. **Vector DB (Khối C1, C2) — ChromaDB:**
-   - Đây là Vector DB thuần Python, lưu dữ liệu trực tiếp dưới dạng file nhị phân trong thư mục project (`./data/chroma`).
+| Lớp kiến trúc (Layer) | Công nghệ / Thư viện (Tech / Lib) | Vai trò & Chức năng trong Hệ thống |
+|---|---|---|
+| **Frontend Framework** | **Next.js 14/15** (React, TypeScript, Tailwind CSS) | Giao diện web hiện đại cho Học viên (làm bài quiz 5 phút, xem giải thích trích dẫn) & Giảng viên/TA (xem Báo cáo Bản đồ Lỗ hổng Kiến thức) |
+| **Backend Core** | **Python 3.10+** | Ngôn ngữ lập trình chính cho toàn bộ RESTful API, AI engines và CLI |
+| **Agent Orchestration** | **LangGraph** (`langgraph >= 0.2.0`) | Điều phối luồng làm việc giữa các AI Agent (Denoising, Generator, Grader, Analytics) dưới dạng State Graph |
+| **LLM Framework** | **LangChain** (`langchain`, `langchain-openai`) | Xử lý Prompt Templates, LLM Chains, Output Parsers và tích hợp các LLM providers |
+| **LLM Engine / Models** | **OpenAI API** (`gpt-4o-mini`, `gpt-4o`) / **Gemini** | Bộ não AI thực hiện lọc rác (Denoising), sinh bài tập (Quiz Generator), chấm tự luận (Auto Grader) & tổng hợp lỗ hổng kiến thức |
+| **Data Validation** | **Pydantic v2** (Backend) & **Zod / TypeScript** (Frontend) | Định nghĩa & kiểm soát schema dữ liệu đầu ra JSON ngặt nghèo giữa Frontend và Backend |
+| **Backend API Server** | **FastAPI** + **Uvicorn** | Cung cấp RESTful API Web Server, Swagger UI tự động tại `/docs` kết nối trực tiếp với Next.js Frontend qua HTTP/REST |
+| **Vector DB (RAG)** | **ChromaDB** (`chromadb`) | Cơ sở dữ liệu Vector (lưu trữ local) lưu Embeddings Slide (Anchor) và Transcript (Enrichment Context) phục vụ 2-Step Retrieval |
+| **Relational & JSON DB** | **SQLite** (`sqlite3`) / **JSON Storage** | Lưu trữ Ngân hàng bài tập (Quiz Bank), Lịch sử làm bài của học viên & Báo cáo lỗ hổng (Analytics DB) |
+| **Testing & Eval** | **Pytest** + **HTTPX** | Chạy bộ kiểm thử tự động Golden Set (20 test cases) để đánh giá Pass Rate (Quality Bar ≥ 85%) |
+
+---
+
+### 💡 Lý Do Lựa Chọn Chiến Lược Micro-Stack
+Cấu trúc Micro-stack này kết hợp giữa **FastAPI (AI Engine & Data Layer)** và **Next.js (Web Interface UI)** giúp vận hành toàn bộ hệ thống mượt mà trên máy cá nhân (Local) hoặc Server demo mà **không cần cài đặt thêm bất kỳ phần mềm máy chủ database phức tạp nào** (như PostgreSQL, MySQL hay Pinecone):
+
+1. **Frontend (Khối G1) — Next.js:**
+   - Xây dựng giao diện responsive, mượt mà với Tailwind CSS & React Components.
+   - Giao tiếp trực tiếp với FastAPI backend qua chuẩn RESTful API (`fetch`/`axios`).
+
+2. **Vector DB (Khối C1, C2) — ChromaDB:**
+   - Vector DB thuần Python, lưu dữ liệu trực tiếp dưới dạng file nhị phân trong thư mục project (`./data/chroma`).
    - Khởi tạo cực nhanh chỉ với 1 lệnh: `pip install chromadb`.
 
-2. **Quiz Bank & User DB (Khối F1, I) — SQLite:**
+3. **Quiz Bank & User DB (Khối F1, I) — SQLite & JSON:**
    - SQLite đi kèm sẵn trong thư viện chuẩn của Python (`import sqlite3`), hoàn toàn không cần cài đặt thêm server.
    - Hoàn toàn có thể lưu trữ linh hoạt định dạng dữ liệu **JSON** và xử lý các bảng thông tin học viên, lịch sử điểm số và báo cáo.
 
-### ⭐ Ưu điểm vượt trội:
+### ⭐ Ưu Điểm Vượt Trội Của Tech Stack:
 - **Khởi động dự án là chạy được ngay:** Không phụ thuộc dịch vụ Cloud hay Database Server bên ngoài.
+- **Trải nghiệm người dùng cao cấp (UI/UX):** Next.js mang lại giao diện hiện đại, chuyên nghiệp cho cả Học viên lẫn Giảng viên.
+- **Tối ưu chi phí & Tốc độ phát triển:** Tối đa hóa tốc độ phát triển trong 1.5 ngày Hackathon.
 - **Rất dễ chia sẻ & Chấm bài:** Dễ dàng đóng gói code nộp cho Giảng viên, TA hoặc bạn cùng nhóm mà không bắt họ phải cài đặt cấu hình server phức tạp.
