@@ -11,7 +11,7 @@ Trong các khoá học (đặc biệt là khoá học AI Thực Chiến), đội
 Hệ thống **VLearn EduAI** ứng dụng công nghệ Trí tuệ Nhân tạo (AI Agent & RAG Pipeline) để xây dựng một nền tảng tự động hóa toàn diện:
 - **Tự động phân tích nội dung bài giảng:** Đọc hiểu Slide PDF và Transcript bài giảng thô để tự động sinh bài tập đa dạng (Trắc nghiệm, Điền khuyết, Tự luận ngắn) kèm trích dẫn chính xác nguồn tài liệu ngay sau mỗi buổi học.
 - **Tự động chấm điểm & Đánh giá:** Chấm bài tự luận ngắn của học viên dựa trên đáp án chuẩn và phân tích ngữ nghĩa, tự động phát hiện prompt injection hoặc bài làm hời hợt.
-- **Số hóa Báo cáo Lỗ hổng Kiến thức:** Xuất các biểu đồ báo cáo trực quan giúp giáo viên nhận diện tức thì những lỗ hổng kiến thức chung của lớp hoặc từng cá nhân, qua đó cá nhân hóa việc học và nâng cao chất lượng giảng dạy.
+- **Số hóa Báo cáo Lỗ hổng Kiến thức:** Xuất các biểu đồ báo cáo trực quan giúp giáo viên nhận diện tức thời những lỗ hổng kiến thức chung của lớp hoặc từng cá nhân, qua đó cá nhân hóa việc học và nâng cao chất lượng giảng dạy.
 
 ---
 
@@ -103,7 +103,7 @@ graph TD
 
 ---
 
-## 🌐 Khối 7: Giao Diện Học Viên & Đánh Giá Tự Động (Delivery & Evaluation)
+### 🌐 Khối 7: Giao Diện Học Viên & Đánh Giá Tự Động (Delivery & Evaluation)
 - **`G1 (VLearn Student Web Interface)`**: Giao diện học tập cho học viên làm bài tập 5 phút ngay sau buổi học.
 - **`H1 (AI Evaluation & Explanation Agent)`**: AI Agent tự động chấm điểm bài làm:
   - Chấm trắc nghiệm & điền khuyết cứng.
@@ -120,3 +120,26 @@ graph TD
 2. **LLM Denoising:** Giải quyết triệt để bài toán rác dữ liệu trong transcript bài giảng thô.
 3. **Chấm bài kèm Grounding Citation:** Học viên làm sai câu nào được hướng dẫn đọc lại chính xác phút/đoạn đó trong bài giảng.
 4. **Vòng lặp học tập thích ứng (Adaptive Learning Loop):** Hệ thống ngày càng thông minh và bám sát điểm yếu của lớp nhờ vòng lặp phản hồi dữ liệu từ `Analytics DB` quay lại `Chatlog`.
+
+---
+
+## 🛠️ 5. Kiến Trúc Công Nghệ & Lựa Chọn Database (Micro-Stack Strategy)
+
+Hệ thống ưu tiên phương án **"Micro-stack" cấp độ Demo/Đồ án** (Nhanh, dễ setup, 100% Python-native):
+- **Ngôn ngữ phát triển chính:** Python
+- **Lựa chọn Database:** **ChromaDB** (cho Vector Storage) + **SQLite** (cho Relational Data & JSON Storage)
+
+### 💡 Lý do lựa chọn Micro-stack
+Nếu dự án của bạn là đồ án chạy trên máy cá nhân (Local) và Frontend dùng **Streamlit** hoặc **FastAPI UI**, cấu trúc này giúp bạn chạy toàn bộ hệ thống mà **không cần cài đặt thêm bất kỳ phần mềm máy chủ database nào** (như PostgreSQL, MySQL hay Pinecone).
+
+1. **Vector DB (Khối C1, C2) — ChromaDB:**
+   - Đây là Vector DB thuần Python, lưu dữ liệu trực tiếp dưới dạng file nhị phân trong thư mục project (`./data/chroma`).
+   - Khởi tạo cực nhanh chỉ với 1 lệnh: `pip install chromadb`.
+
+2. **Quiz Bank & User DB (Khối F1, I) — SQLite:**
+   - SQLite đi kèm sẵn trong thư viện chuẩn của Python (`import sqlite3`), hoàn toàn không cần cài đặt thêm server.
+   - Hoàn toàn có thể lưu trữ linh hoạt định dạng dữ liệu **JSON** và xử lý các bảng thông tin học viên, lịch sử điểm số và báo cáo.
+
+### ⭐ Ưu điểm vượt trội:
+- **Khởi động dự án là chạy được ngay:** Không phụ thuộc dịch vụ Cloud hay Database Server bên ngoài.
+- **Rất dễ chia sẻ & Chấm bài:** Dễ dàng đóng gói code nộp cho Giảng viên, TA hoặc bạn cùng nhóm mà không bắt họ phải cài đặt cấu hình server phức tạp.
