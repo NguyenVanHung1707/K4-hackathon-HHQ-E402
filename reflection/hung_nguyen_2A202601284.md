@@ -1,15 +1,15 @@
-# 🪞 Reflection Cá Nhân — Nguyễn Văn Hưng (Mã HV: 2A202601284)
+# Reflection cá nhân — Nguyễn Văn Hưng (Mã HV: 2A202601284)
 
-- **Vai trò trong nhóm:** Trưởng nhóm & AI Engineer phụ trách Kiến trúc AI Spec, Thiết kế Prompt & LangGraph Generator Agent (`codebase/src/generator.py`).
-- **Phần công việc đảm nhận:** 
-  1. Xây dựng tài liệu `spec.md` (8 phần + §9 Changelog).
-  2. Phát triển Generator Engine phân tích transcript bài giảng và sinh 3 dạng bài tập (trắc nghiệm, điền khuyết, tự luận ngắn) có đính kèm trích dẫn `[transcript_id:line]`.
-  3. Phối hợp thiết kế bộ 20 test cases cho Golden Set (`eval/golden_set.json`).
+## Vai trò và phần công việc đảm nhận
 
-- **AI hỗ trợ như thế nào trong quá trình build:**
-  - Sử dụng Claude Code & Antigravity IDE để tự động hoá việc tạo mẫu Pydantic Schemas, viết unit test mock data, và tối ưu hóa System Prompt chống hallucination.
-  - Sử dụng AI để rà soát 4 lớp chỗ khó (ERR-1.1 đến ERR-4.2) và xây dựng bộ lọc Prompt Injection.
+Tôi là trưởng nhóm, đồng thời phụ trách AI Spec và Generator Engine. Công việc chính của tôi gồm xây dựng `spec.md`; thiết kế prompt và phát triển `codebase/src/generator.py` để sinh câu hỏi trắc nghiệm, điền khuyết và tự luận ngắn có trích dẫn; đồng thời phối hợp xây dựng Golden Set 20 test case.
 
-- **Bài học rút ra từ một case fail của chính nhóm:**
-  - *Case Fail:* Ở lượt chạy Eval 1, hệ thống rớt 3 case do AI tự động suy đoán thêm kiến thức về *Fine-tuning* trong khi bài giảng transcript chỉ dạy về *RAG cơ bản* (lỗi ERR-1.1 - Grounding Failure).
-  - *Bài học:* Không được để LLM suy luận tự do mà phải siết chặt System Prompt với nguyên tắc "Strict Grounding": Chỉ được đặt câu hỏi trên dữ liệu transcript có sẵn, nếu không có phải từ chối hoặc bỏ qua. Điều này giúp tăng tỷ lệ Eval Pass từ 70% lên 90% ở lượt chạy thứ 2.
+## AI đã hỗ trợ tôi như thế nào
+
+Tôi sử dụng Claude Code và Antigravity IDE để gợi ý cấu trúc Pydantic schema, tạo dữ liệu mock và rà soát System Prompt. AI còn đóng vai trò phản biện, giúp tìm các tình huống có thể hallucinate, sinh sai loại câu hỏi hoặc không bám transcript. Tôi đối chiếu các đề xuất với schema, transcript và Golden Set trước khi đưa vào hệ thống.
+
+## Case fail và bài học rút ra
+
+Trong cả hai lượt Eval, hệ thống đạt 17/20 case, tương đương 85%. Ba case `CASE-03`, `CASE-07` và `CASE-10` đều yêu cầu dạng `short_answer`, nhưng Generator chưa tạo được đầu ra đúng tiêu chí. Kết quả không thay đổi sau hai lượt cho thấy chỉ tối ưu prompt là chưa đủ; hệ thống còn cần bước kiểm tra có cấu trúc sau khi LLM sinh nội dung.
+
+Bài học lớn nhất của tôi là không nên coi đầu ra của LLM là kết quả cuối cùng. Ngoài strict grounding, Generator phải xác thực `question_type`, schema, nội dung kỳ vọng và trích dẫn. Nếu đầu ra không đạt, hệ thống cần sinh lại hoặc báo lỗi rõ ràng. Eval không chỉ chứng minh sản phẩm hoạt động mà còn chỉ ra chính xác phần kiến trúc cần cải tiến.
