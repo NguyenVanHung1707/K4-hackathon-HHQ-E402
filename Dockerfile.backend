@@ -1,0 +1,16 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Copy requirements first to leverage Docker cache
+COPY codebase/requirements.txt codebase/
+RUN pip install --no-cache-dir -r codebase/requirements.txt
+
+# Copy source code
+COPY codebase/ codebase/
+
+# Expose backend port
+EXPOSE 8000
+
+# Start FastAPI server
+CMD ["python", "codebase/src/main.py", "--server"]
