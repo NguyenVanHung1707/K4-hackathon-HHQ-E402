@@ -93,9 +93,10 @@ export const QuizSetupModal: React.FC<QuizSetupModalProps> = ({
     });
 
     const quizTypesStr = summaryParts.join(', ');
+    const validSessionId = sessionId && sessionId !== 'undefined' ? sessionId : 'Day01';
 
     try {
-      const res = await fetch(`/api/student/session/${sessionId}/generate-quiz`, {
+      const res = await fetch(`/api/student/session/${validSessionId}/generate-quiz`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -107,10 +108,15 @@ export const QuizSetupModal: React.FC<QuizSetupModalProps> = ({
         }),
       });
 
-      if (res.status === 403) {
-        const errData = await res.json();
-        setErrorMsg(errData.detail || '403 Forbidden: Yêu cầu hoàn thành bài tập buổi trước!');
+      if (!res.ok) {
+        let errorDetail = '';
+        try {
+          const errData = await res.json();
+          errorDetail = errData.detail;
+        } catch {}
+        
         setLoading(false);
+        setErrorMsg(errorDetail || `Lỗi máy chủ (${res.status}): Không thể sinh bài tập.`);
         return;
       }
 
@@ -119,7 +125,7 @@ export const QuizSetupModal: React.FC<QuizSetupModalProps> = ({
       onStartQuiz(data, { numQuestions: totalQuestions, quizTypes: quizTypesStr, difficulty });
     } catch {
       setLoading(false);
-      setErrorMsg('Không thể kết nối AI Server để tạo đề bài.');
+      setErrorMsg('Không thể kết nối đến Backend Server (http://localhost:8000). Vui lòng kiểm tra lại server đã được chạy chưa!');
     }
   };
 

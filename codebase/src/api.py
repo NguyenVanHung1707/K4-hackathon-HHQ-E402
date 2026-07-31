@@ -51,6 +51,42 @@ def read_root():
     }
 
 
+@app.post("/v1/chat/completions")
+def openai_compatible_chat_completions(payload: Dict[str, Any] = Body(...)):
+    """Local OpenAI-compatible API Endpoint (Thay thế API Key 100% không đổi pipeline)."""
+    messages = payload.get("messages", [])
+    prompt_text = ""
+    for msg in messages:
+        role = msg.get("role", "user")
+        content = msg.get("content", "")
+        prompt_text += f"{role.upper()}: {content}\n"
+
+    try:
+        from codebase.src.local_llm import LocalLlamaService
+        llm = LocalLlamaService()
+        json_res = llm.generate_json(prompt_text)
+        content_out = json.dumps(json_res, ensure_ascii=False) if json_res else "{}"
+    except Exception as e:
+        content_out = f"Error: {e}"
+
+    return {
+        "id": "chatcmpl-local-llama32",
+        "object": "chat.completion",
+        "created": 1700000000,
+        "model": payload.get("model", "Llama-3.2-1B"),
+        "choices": [
+            {
+                "index": 0,
+                "message": {
+                    "role": "assistant",
+                    "content": content_out
+                },
+                "finish_reason": "stop"
+            }
+        ]
+    }
+
+
 # =====================================================================
 # 1. YÊU CẦU CHO TEACHER (Loại bỏ Generation - Chỉ Upload Học Liệu & Analytics)
 # =====================================================================
@@ -205,11 +241,21 @@ def student_generate_quiz(session_id: str, payload: Dict[str, Any] = Body(defaul
     weak_concepts = prev_weakness.get("weak_concepts", [])
 
     mod = db.get_module_by_id(session_id)
-    retrieved_context = mod.get("description", "") if mod else "Nội dung bài giảng AI Vector DB"
+    session_title = mod.get("title", session_id) if mod else session_id
+
+    # Dynamic Retrieval from Vector DB & Embeddings
+    rag_retrieval = generator.vector_store.two_step_retrieval(query=session_title, transcript_id=session_id)
+    enrichment_chunks = rag_retrieval.get("enrichment_context", [])
+    
+    if enrichment_chunks:
+        context_parts = [f"- {c['text']} (Citation: {c.get('citation', '')})" for c in enrichment_chunks]
+        retrieved_context = f"Nội dung RAG Vector DB cho {session_title}:\n" + "\n".join(context_parts)
+    else:
+        retrieved_context = mod.get("description", "") if mod else "Nội dung bài giảng AI Vector DB"
 
     # Generate Quiz
     generated_quiz = generator.generate_student_triggered_quiz(
-        current_session_name=mod.get("title", session_id) if mod else session_id,
+        current_session_name=session_title,
         retrieved_context=retrieved_context,
         weak_concepts=weak_concepts,
         num_questions=int(num_questions),
@@ -218,10 +264,11 @@ def student_generate_quiz(session_id: str, payload: Dict[str, Any] = Body(defaul
         type_counts=type_counts
     )
 
-    # Purge old quiz data for this student & session before saving newly generated quiz
+    # Purge old quiz data & old submission logs for this student & session before saving newly generated quiz
     quiz_key = f"{student_id}_{session_id}"
     db.delete_quiz(quiz_key)
     db.delete_quiz(session_id)
+    db.delete_submission(student_id, session_id)
 
     # Save newly generated quiz to SQLite DB
     db.save_quiz(quiz_key, session_id, generated_quiz)

@@ -3,6 +3,7 @@ import { QuizSetupModal } from './QuizSetupModal';
 
 interface StudentQuizProps {
   quizId: string;
+  initialQuizData?: any;
   studentProfile: { studentId?: string; fullName?: string };
   onBackToPath: () => void;
   onSelectSession?: (sessionId: string) => void;
@@ -10,11 +11,12 @@ interface StudentQuizProps {
 
 export const StudentQuiz: React.FC<StudentQuizProps> = ({
   quizId,
+  initialQuizData,
   studentProfile,
   onBackToPath,
   onSelectSession,
 }) => {
-  const [quizData, setQuizData] = useState<any>(null);
+  const [quizData, setQuizData] = useState<any>(initialQuizData || null);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState<boolean>(false);
   const [gradingResult, setGradingResult] = useState<any>(null);
@@ -46,6 +48,11 @@ export const StudentQuiz: React.FC<StudentQuizProps> = ({
     setSubmitted(false);
     setGradingResult(null);
     setAnswers({});
+
+    if (initialQuizData && initialQuizData.questions && initialQuizData.questions.length > 0) {
+      setQuizData(initialQuizData);
+      return;
+    }
 
     fetch(`/api/student/session/${quizId}/quiz?student_id=${studentProfile.studentId || '2012345'}`)
       .then(async (res) => {
@@ -118,7 +125,19 @@ export const StudentQuiz: React.FC<StudentQuizProps> = ({
     }
   };
 
-  const currentQuestions = quizData?.questions || [];
+  const typeOrderMap: Record<string, number> = {
+    multiple_choice: 1,
+    fill_in_blank: 2,
+    short_essay: 3,
+  };
+  const rawQuestions = quizData?.questions || [];
+  const currentQuestions = [...rawQuestions].sort((a: any, b: any) => {
+    if (a.is_review) return -1;
+    if (b.is_review) return 1;
+    const pA = typeOrderMap[a.type] || 1;
+    const pB = typeOrderMap[b.type] || 1;
+    return pA - pB;
+  });
 
   return (
     <div className="bg-[#f8f9ff] text-[#0b1c30] min-h-screen font-body-md flex flex-col">
@@ -296,15 +315,16 @@ export const StudentQuiz: React.FC<StudentQuizProps> = ({
                   const userAns = answers[qId] || 'Bỏ trống';
                   const correctAns = q.correct_answer || q.correctAnswer || 'A';
                   const qResult = gradingResult?.question_results?.find(
-                    (r: any) => r.question_id === qId
+                    (r: any) => String(r.question_id) === String(qId) || String(r.question_id) === `Q${idx + 1}`
                   );
+                  const qType = q.type || 'multiple_choice';
                   const isCorrect = qResult
                     ? qResult.score > 0
-                    : userAns.toLowerCase() === correctAns.toLowerCase();
+                    : (qType === 'multiple_choice' ? userAns.toLowerCase() === correctAns.toLowerCase() : false);
                   const explanationText =
-                    q.explanation ||
                     qResult?.feedback ||
-                    'Giải thích dựa trên tài liệu bài giảng nguyên bản.';
+                    q.explanation ||
+                    'Giải thích chi tiết từ AI Tutor dựa trên tài liệu bài giảng.';
                   const citationText = q.citation || qResult?.citation || '';
 
                   return (
@@ -318,7 +338,7 @@ export const StudentQuiz: React.FC<StudentQuizProps> = ({
                     >
                       <div className="flex justify-between items-start mb-3">
                         <span className="font-mono text-xs font-bold text-[#0f2a90]">
-                          CÂU {idx + 1} / {currentQuestions.length} ({q.type || 'TRẮC NGHIỆM'})
+                          CÂU {idx + 1} / {currentQuestions.length} ({qType === 'multiple_choice' ? 'TRẮC NGHIỆM' : (qType === 'fill_in_blank' ? 'ĐIỀN TỪ' : 'TỰ LUẬN NGẮN')})
                         </span>
                         <span
                           className={`font-mono text-xs px-3 py-1 rounded-full font-bold ${
@@ -327,7 +347,7 @@ export const StudentQuiz: React.FC<StudentQuizProps> = ({
                               : 'bg-[#ffdad6] text-[#93000a]'
                           }`}
                         >
-                          {isCorrect ? '✓ ĐÚNG (+1.0 ĐIỂM)' : '✗ CHƯA ĐÚNG (0 ĐIỂM)'}
+                          {isCorrect ? `✓ ĐÚNG (+${qResult?.score || 1.0} ĐIỂM)` : '✗ CHƯA ĐÚNG (0 ĐIỂM)'}
                         </span>
                       </div>
 
@@ -338,13 +358,13 @@ export const StudentQuiz: React.FC<StudentQuizProps> = ({
                       {/* User Choice vs Correct Choice */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4 text-xs font-mono">
                         <div className="p-3 rounded-2xl bg-white border border-[#c5c5d4]">
-                          <span className="text-[#757684] block mb-1 font-sans">Câu trả lời của bạn:</span>
+                          <span className="text-[#757684] block mb-1 font-sans">Bài làm của bạn:</span>
                           <span className={isCorrect ? 'text-[#006c49] font-bold' : 'text-[#ba1a1a] font-bold'}>
                             {userAns}
                           </span>
                         </div>
                         <div className="p-3 rounded-2xl bg-[#eff4ff] border border-[#0f2a90]/30">
-                          <span className="text-[#0f2a90] block mb-1 font-sans">Đáp án chính xác:</span>
+                          <span className="text-[#0f2a90] block mb-1 font-sans">Đáp án tham khảo / Chuẩn:</span>
                           <span className="text-[#0f2a90] font-bold">{correctAns}</span>
                         </div>
                       </div>
@@ -352,8 +372,8 @@ export const StudentQuiz: React.FC<StudentQuizProps> = ({
                       {/* AI Detailed Explanation Box */}
                       <div className="p-4 bg-white rounded-2xl border-l-4 border-[#0f2a90] shadow-sm">
                         <div className="flex items-center gap-2 mb-1 text-xs font-bold text-[#0f2a90] font-mono">
-                          <span className="material-symbols-outlined text-sm">lightbulb</span>
-                          GIẢI THÍCH CHI TIẾT TỪ AI TUTOR:
+                          <span className="material-symbols-outlined text-sm">auto_awesome</span>
+                          ĐÁNH GIÁ NGỮ NGHĨA & KẾT QUẢ TỪ AI TUTOR:
                         </div>
                         <p className="font-body-md text-xs text-[#0b1c30] leading-relaxed mb-2">
                           {explanationText}
@@ -399,14 +419,57 @@ export const StudentQuiz: React.FC<StudentQuizProps> = ({
                 </button>
               </div>
             ) : (
-              <div className="space-y-6">
+              <div className="space-y-8">
               {currentQuestions.map((q: any, idx: number) => {
                 const qId = q.id || `Q${idx + 1}`;
+                const qType = q.type || 'multiple_choice';
+                const isFirstSession = ['Day01', 'Day1', 'MOD-01', 'Buổi 1'].some((k) => (quizId || '').includes(k));
+                const isReview = !isFirstSession && idx === 0 && Boolean(q.is_review);
+
+                // Render Section Headers when question type changes
+                const prevType = idx > 0 ? (currentQuestions[idx - 1].type || 'multiple_choice') : null;
+                const isNewSection = idx === 0 || qType !== prevType;
+
+                let sectionTitle = '';
+                let sectionIcon = '';
+                let sectionDesc = '';
+                if (isNewSection) {
+                  if (qType === 'multiple_choice') {
+                    sectionTitle = 'PHẦN I: CÂU HỎI TRẮC NGHIỆM (MULTIPLE CHOICE)';
+                    sectionIcon = 'list_alt';
+                    sectionDesc = 'Chọn 1 đáp án chính xác nhất trong số các phương án cho sẵn.';
+                  } else if (qType === 'fill_in_blank') {
+                    sectionTitle = 'PHẦN II: CÂU HỎI ĐIỀN TỪ / ĐIỀN KHUYẾT (FILL IN THE BLANK)';
+                    sectionIcon = 'edit_note';
+                    sectionDesc = 'Nhập từ/khái niệm thích hợp. AI Tutor sẽ tự động đánh giá từ đồng nghĩa.';
+                  } else {
+                    sectionTitle = 'PHẦN III: CÂU HỎI TỰ LUẬN NGẮN (SHORT ESSAY)';
+                    sectionIcon = 'history_edu';
+                    sectionDesc = 'Viết phân tích ngắn (2-3 câu). AI Tutor sẽ chấm điểm ngữ nghĩa chuyên sâu.';
+                  }
+                }
+
                 return (
-                  <div key={qId} className="bg-white rounded-3xl p-6 md:p-8 border border-[#c5c5d4] shadow-sm">
+                  <React.Fragment key={qId}>
+                    {isNewSection && (
+                      <div className="pt-4 pb-2 border-b-2 border-[#0f2a90]/20 mb-4">
+                        <div className="flex items-center gap-2 text-[#0f2a90] font-headline-md text-base md:text-lg font-bold">
+                          <span className="material-symbols-outlined text-xl">{sectionIcon}</span>
+                          <span>{sectionTitle}</span>
+                        </div>
+                        <p className="text-xs text-[#757684] mt-1 font-body-md">{sectionDesc}</p>
+                      </div>
+                    )}
+                    <div className={`rounded-3xl p-6 md:p-8 border shadow-sm transition-all ${isReview ? 'bg-[#fffdf5] border-[#ffe082]' : 'bg-white border-[#c5c5d4]'}`}>
+                    {isReview && (
+                      <div className="mb-3 inline-flex items-center gap-1.5 px-3.5 py-1 bg-[#fff8e1] text-[#b78103] border border-[#ffe082] rounded-full font-label-caps text-xs font-bold shadow-sm">
+                        <span className="material-symbols-outlined text-sm">history_edu</span>
+                        🔄 CÂU ÔN TẬP KIẾN THỨC BUỔI 1 (ÔN LẠI LỖ HỔNG BÀI TRƯỚC)
+                      </div>
+                    )}
                     <div className="flex justify-between items-center mb-3 font-mono text-xs text-[#757684]">
                       <span className="font-bold text-[#0f2a90]">
-                        CÂU {idx + 1} / {currentQuestions.length} ({q.type === 'multiple_choice' ? 'TRẮC NGHIỆM' : (q.type === 'fill_in_blank' ? 'ĐIỀN TỪ' : 'TỰ LUẬN NGẮN')})
+                        CÂU {idx + 1} / {currentQuestions.length} ({qType === 'multiple_choice' ? 'TRẮC NGHIỆM' : (qType === 'fill_in_blank' ? 'ĐIỀN TỪ' : 'TỰ LUẬN NGẮN')})
                       </span>
                       <span>{q.citation || `[${quizId}]`}</span>
                     </div>
@@ -470,8 +533,9 @@ export const StudentQuiz: React.FC<StudentQuizProps> = ({
                       </div>
                     )}
                   </div>
-                );
-              })}
+                </React.Fragment>
+              );
+            })}
 
               {/* Submit Quiz Action Bar */}
               <div className="pt-6 flex justify-end">
@@ -502,8 +566,20 @@ export const StudentQuiz: React.FC<StudentQuizProps> = ({
       {/* Setup Modal */}
       <QuizSetupModal
         isOpen={setupModalOpen}
+        sessionTitle={quizData?.title || quizId || 'Bài Tập Học Tập'}
+        sessionId={quizId || 'Day01'}
+        studentId={studentProfile.studentId || '2012345'}
         onClose={() => setSetupModalOpen(false)}
-        onApplySetup={handleApplySetup}
+        onStartQuiz={(newQuizData) => {
+          setSetupModalOpen(false);
+          setQuizData(null);
+          setAnswers({});
+          setSubmitted(false);
+          setGradingResult(null);
+          setTimeout(() => {
+            setQuizData(newQuizData);
+          }, 50);
+        }}
       />
     </div>
   );

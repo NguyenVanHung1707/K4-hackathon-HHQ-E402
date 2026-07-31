@@ -102,7 +102,17 @@ def run_cli_demo():
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "--server":
-        print("🚀 Đang khởi chạy FastAPI REST Server tại http://localhost:8000 ...")
+        print("🌱 Tự động kiểm tra & Seed dữ liệu học liệu mẫu cho Day01...")
+        try:
+            try:
+                from codebase.seed_data import run_seed
+            except ImportError:
+                from seed_data import run_seed
+            run_seed()
+        except Exception as e:
+            print(f"⚠️ Seeding warning: {e}")
+
+        print("🚀 Đang khởi chạy FastAPI REST Server tại http://0.0.0.0:8000 ...")
         import uvicorn
         uvicorn.run("codebase.src.api:app", host="0.0.0.0", port=8000, reload=True)
     else:

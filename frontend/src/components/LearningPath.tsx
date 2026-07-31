@@ -5,9 +5,10 @@ import { QuizSetupModal } from './QuizSetupModal';
 interface LearningPathProps {
   studentProfile: StudentProfile;
   onStartQuiz: (quizId?: string, quizData?: any) => void;
+  onBackToRoleSelect: () => void;
 }
 
-export const LearningPath: React.FC<LearningPathProps> = ({ studentProfile, onStartQuiz }) => {
+export const LearningPath: React.FC<LearningPathProps> = ({ studentProfile, onStartQuiz, onBackToRoleSelect }) => {
   const [progressMap, setProgressMap] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [forbiddenError, setForbiddenError] = useState<string | null>(null);
@@ -87,6 +88,13 @@ export const LearningPath: React.FC<LearningPathProps> = ({ studentProfile, onSt
       {/* Top Header */}
       <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-[#e5eeff] px-4 md:px-10 h-16 flex items-center justify-between">
         <div className="flex items-center gap-3">
+          <button
+            onClick={onBackToRoleSelect}
+            className="flex items-center gap-1.5 text-xs font-bold text-[#757684] hover:text-[#0f2a90] hover:bg-[#eff4ff] transition-all border border-[#c5c5d4] hover:border-[#0f2a90]/40 rounded-full px-3 py-1 cursor-pointer bg-white"
+          >
+            <span className="material-symbols-outlined text-sm">arrow_back</span>
+            <span>Vai trò</span>
+          </button>
           <span className="font-display-lg text-2xl font-bold text-[#0f2a90]">VLearn</span>
         </div>
 

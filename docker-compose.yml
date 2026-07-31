@@ -9,7 +9,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./data:/app/data
+      - vlearn-data:/app/data
     env_file:
       - .env
     restart: unless-stopped
@@ -24,7 +24,7 @@ services:
     ports:
       - "5173:5173"
     environment:
-      - VITE_API_URL=http://localhost:8000
+      - VITE_API_URL=http://backend:8000
     depends_on:
       - backend
     restart: unless-stopped
@@ -34,3 +34,6 @@ services:
 networks:
   vlearn-network:
     driver: bridge
+
+volumes:
+  vlearn-data:

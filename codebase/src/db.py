@@ -156,6 +156,13 @@ class SQLiteDatabase:
             ))
             conn.commit()
 
+    def delete_submission(self, student_id: str, transcript_id: str):
+        """Xóa hoàn toàn lịch sử nộp bài cũ khi sinh viên chọn tạo lại đề bài mới."""
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM submissions WHERE student_id = ? AND transcript_id = ?", (student_id, transcript_id))
+            conn.commit()
+
     def get_all_submissions(self) -> List[Dict[str, Any]]:
         """Lấy toàn bộ lịch sử bài nộp mới nhất để tạo báo cáo Analytics."""
         with self._get_connection() as conn:

@@ -91,24 +91,56 @@ class RAGVectorStore:
                 self._transcript_memory.append(chunk)
         return len(chunks)
 
-    def two_step_retrieval(self, query: str, transcript_id: str = "T-01") -> Dict[str, Any]:
+    def two_step_retrieval(self, query: str, transcript_id: str = "Day01") -> Dict[str, Any]:
         """Quy trình 2-Step Retrieval Logic:
-        Step 1 (Anchor): Tìm các khái niệm cốt lõi từ Slide.
-        Step 2 (Enrichment): Tìm ngữ cảnh chi tiết & ví dụ từ Transcript matching với khái niệm mỏ neo.
+        Step 1 (Anchor): Tìm các khái niệm cốt lõi từ Slide thuộc đúng transcript_id.
+        Step 2 (Enrichment): Tìm ngữ cảnh chi tiết & ví dụ từ Transcript thuộc đúng transcript_id.
         """
         anchors = []
         enrichments = []
 
-        # Step 1: Slide Core Retrieval
+        # Step 1: Slide Core Retrieval (Cô lập theo transcript_id)
         if self.slide_collection and self.slide_collection.count() > 0:
-            res = self.slide_collection.query(query_texts=[query], n_results=2)
-            if res and res.get("documents"):
-                anchors = res["documents"][0]
+            try:
+                res = self.slide_collection.query(
+                    query_texts=[query],
+                    n_results=2,
+                    where={"transcript_id": transcript_id}
+                )
+                if res and res.get("documents") and len(res["documents"]) > 0 and len(res["documents"][0]) > 0:
+                    anchors = res["documents"][0]
+                else:
+                    res = self.slide_collection.query(query_texts=[query], n_results=2)
+                    if res and res.get("documents"):
+                        anchors = res["documents"][0]
+            except Exception:
+                res = self.slide_collection.query(query_texts=[query], n_results=2)
+                if res and res.get("documents"):
+                    anchors = res["documents"][0]
         else:
             anchors = [item["text"] for item in getattr(self, "_slide_memory", []) if query.lower() in item["text"].lower()][:2]
 
-        # Step 2: Transcript Context Retrieval
+        # Step 2: Transcript Context Retrieval (Cô lập theo transcript_id)
         if self.transcript_collection and self.transcript_collection.count() > 0:
+            try:
+                res = self.transcript_collection.query(
+                    query_texts=[query],
+                    n_results=3,
+                    where={"transcript_id": transcript_id}
+                )
+                if res and res.get("documents") and len(res["documents"]) > 0 and len(res["documents"][0]) > 0:
+                    docs = res["documents"][0]
+                    metas = res["metadatas"][0] if res.get("metadatas") else []
+                    for doc, meta in zip(docs, metas):
+                        enrichments.append({
+                            "text": doc,
+                            "citation": meta.get("citation", f"[{transcript_id}:L10-L20]"),
+                            "transcript_id": meta.get("transcript_id", transcript_id)
+                        })
+            except Exception:
+                pass
+
+        if not enrichments and self.transcript_collection and self.transcript_collection.count() > 0:
             res = self.transcript_collection.query(query_texts=[query], n_results=3)
             if res and res.get("documents"):
                 docs = res["documents"][0]
@@ -119,13 +151,6 @@ class RAGVectorStore:
                         "citation": meta.get("citation", f"[{transcript_id}:L10-L20]"),
                         "transcript_id": meta.get("transcript_id", transcript_id)
                     })
-        else:
-            mem = getattr(self, "_transcript_memory", [])
-            for item in mem:
-                if query.lower() in item["text"].lower():
-                    enrichments.append(item)
-                if len(enrichments) >= 3:
-                    break
 
         return {
             "query": query,

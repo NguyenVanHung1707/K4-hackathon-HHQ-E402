@@ -21,7 +21,8 @@ export default function App() {
     studentId: '2012345',
   });
 
-  const [activeQuizId, setActiveQuizId] = useState<string>('MOD-01');
+  const [activeQuizId, setActiveQuizId] = useState<string>('Day01');
+  const [activeQuizData, setActiveQuizData] = useState<any>(null);
 
   const handleSelectRole = (role: UserRole, nextScreen?: ActiveScreen) => {
     setUserRole(role);
@@ -59,19 +60,25 @@ export default function App() {
         {activeScreen === 'learning-path' && (
           <LearningPath
             studentProfile={studentProfile}
-            onStartQuiz={(quizId) => {
+            onStartQuiz={(quizId, quizData) => {
               if (quizId) setActiveQuizId(quizId);
+              if (quizData) setActiveQuizData(quizData);
               setActiveScreen('quiz');
             }}
+            onBackToRoleSelect={() => setActiveScreen('role-select')}
           />
         )}
 
         {activeScreen === 'quiz' && (
           <StudentQuiz
             quizId={activeQuizId}
+            initialQuizData={activeQuizData}
             studentProfile={studentProfile}
             onBackToPath={() => setActiveScreen('learning-path')}
-            onSelectSession={(sessionId) => setActiveQuizId(sessionId)}
+            onSelectSession={(sessionId) => {
+              setActiveQuizId(sessionId);
+              setActiveQuizData(null);
+            }}
           />
         )}
 

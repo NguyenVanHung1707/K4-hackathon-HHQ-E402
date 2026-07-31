@@ -4,7 +4,7 @@ WORKDIR /app
 
 # Copy requirements first to leverage Docker cache
 COPY codebase/requirements.txt codebase/
-RUN pip install --no-cache-dir -r codebase/requirements.txt
+RUN pip install --no-cache-dir --retries 10 --timeout 60 -r codebase/requirements.txt
 
 # Copy source code
 COPY codebase/ codebase/
