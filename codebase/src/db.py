@@ -104,6 +104,16 @@ class SQLiteDatabase:
                 )
             """)
 
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS question_banks (
+                    bank_id TEXT PRIMARY KEY,
+                    session_id TEXT NOT NULL,
+                    difficulty TEXT NOT NULL,
+                    questions_json TEXT NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+
             conn.commit()
 
     def save_quiz(self, quiz_id: str, transcript_id: str, quiz_data: Dict[str, Any]):
@@ -132,6 +142,32 @@ class SQLiteDatabase:
             if row:
                 return json.loads(row["quiz_data_json"])
         return None
+
+    def save_question_bank(self, session_id: str, difficulty: str, questions: List[Dict[str, Any]]):
+        bank_id = f"{session_id}_{difficulty}"
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                INSERT OR REPLACE INTO question_banks (bank_id, session_id, difficulty, questions_json, created_at)
+                VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+            """, (bank_id, session_id, difficulty, json.dumps(questions, ensure_ascii=False)))
+            conn.commit()
+
+    def get_question_bank(self, session_id: str, difficulty: str) -> List[Dict[str, Any]]:
+        bank_id = f"{session_id}_{difficulty}"
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT questions_json
+                FROM question_banks
+                WHERE bank_id = ?
+                ORDER BY created_at DESC
+                LIMIT 1
+            """, (bank_id,))
+            row = cursor.fetchone()
+            if row:
+                return json.loads(row["questions_json"])
+        return []
 
     def save_submission(self, result: Dict[str, Any]):
         """Lưu / Ghi đè log bài nộp mới nhất của học viên vào SQLite cho buổi học tương ứng."""
@@ -267,3 +303,52 @@ class SQLiteDatabase:
             "session_id": previous_session_id,
             "weak_concepts": progress.get("weak_concepts", [])
         }
+
+    def get_previous_wrong_questions(self, student_id: str, previous_session_id: str) -> List[Dict[str, Any]]:
+        """Return questions the student got wrong in the previous session."""
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT submission_json
+                FROM submissions
+                WHERE student_id = ? AND transcript_id = ?
+                ORDER BY created_at DESC
+                LIMIT 1
+            """, (student_id, previous_session_id))
+            row = cursor.fetchone()
+
+        if not row:
+            return []
+
+        submission = json.loads(row["submission_json"])
+        quiz_data = self.get_quiz(f"{student_id}_{previous_session_id}") or self.get_quiz(previous_session_id) or {}
+        question_map = {}
+        for idx, question in enumerate(quiz_data.get("questions", [])):
+            q_id = str(question.get("id") or f"Q{idx + 1}")
+            question_map[q_id] = question
+
+        wrong_questions = []
+        for qr in submission.get("question_results", []):
+            max_score = float(qr.get("max_score") or 1.0)
+            score = float(qr.get("score") or 0.0)
+            if score >= max_score * 0.7:
+                continue
+
+            source_question = question_map.get(str(qr.get("question_id")), {})
+            question_text = qr.get("question_text") or source_question.get("question_text") or source_question.get("question") or qr.get("feedback", "")
+            if not question_text:
+                continue
+
+            wrong_questions.append({
+                "source_session_id": previous_session_id,
+                "question_id": qr.get("question_id"),
+                "question_text": question_text,
+                "type": qr.get("question_type") or source_question.get("type", "multiple_choice"),
+                "concept": qr.get("concept") or source_question.get("concept", "Kien thuc bai truoc"),
+                "options": qr.get("options") or source_question.get("options", []),
+                "correct_answer": qr.get("correct_answer") or source_question.get("correct_answer", ""),
+                "explanation": qr.get("explanation") or source_question.get("explanation") or qr.get("feedback", ""),
+                "citation": qr.get("citation") or source_question.get("citation", previous_session_id)
+            })
+
+        return wrong_questions

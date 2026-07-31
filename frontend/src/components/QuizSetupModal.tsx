@@ -8,20 +8,22 @@ interface QuestionTypeConfig {
 
 interface QuizSetupModalProps {
   isOpen: boolean;
-  sessionTitle: string;
-  sessionId: string;
+  sessionTitle?: string;
+  sessionId?: string;
   studentId?: string;
   onClose: () => void;
-  onStartQuiz: (quizData: any, setupParams: any) => void;
+  onStartQuiz?: (quizData: any, setupParams?: any) => void;
+  onApplySetup?: (setupConfig: any) => void;
 }
 
 export const QuizSetupModal: React.FC<QuizSetupModalProps> = ({
   isOpen,
-  sessionTitle,
-  sessionId,
+  sessionTitle = '',
+  sessionId = '',
   studentId = '2012345',
   onClose,
   onStartQuiz,
+  onApplySetup,
 }) => {
   // Default to exactly 3 questions total (1 Trắc nghiệm, 1 Điền từ, 1 Tự luận = 3 câu)
   const [configs, setConfigs] = useState<QuestionTypeConfig[]>([
@@ -94,8 +96,10 @@ export const QuizSetupModal: React.FC<QuizSetupModalProps> = ({
 
     const quizTypesStr = summaryParts.join(', ');
 
+    const targetSessionId = sessionId || 'Day01';
+
     try {
-      const res = await fetch(`/api/student/session/${sessionId}/generate-quiz`, {
+      const res = await fetch(`/api/student/session/${targetSessionId}/generate-quiz`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -116,7 +120,12 @@ export const QuizSetupModal: React.FC<QuizSetupModalProps> = ({
 
       const data = await res.json();
       setLoading(false);
-      onStartQuiz(data, { numQuestions: totalQuestions, quizTypes: quizTypesStr, difficulty });
+      if (onStartQuiz) {
+        onStartQuiz(data, { numQuestions: totalQuestions, quizTypes: quizTypesStr, difficulty });
+      }
+      if (onApplySetup) {
+        onApplySetup(data);
+      }
     } catch {
       setLoading(false);
       setErrorMsg('Không thể kết nối AI Server để tạo đề bài.');

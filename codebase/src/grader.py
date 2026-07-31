@@ -61,9 +61,49 @@ TUYỆT ĐỐI KHÔNG bắt buộc sinh viên phải gõ chính xác 100% từng
   "feedback": "Nhận xét chi tiết cho sinh viên (giải thích tại sao đúng/chưa đủ/sai)..."
 }}
 """
+        # 1. Try OpenAI first if configured as primary provider
+        if self.settings.llm_provider.lower() == "openai" and self.settings.openai_api_key:
+            try:
+                from langchain_openai import ChatOpenAI
+                from langchain_core.messages import SystemMessage
+
+                llm = ChatOpenAI(
+                    model=self.settings.llm_model_name,
+                    api_key=self.settings.openai_api_key,
+                    temperature=0.2
+                )
+                res = llm.invoke([SystemMessage(content=prompt)])
+                clean_json = res.content.replace("```json\n", "").replace("```", "").strip()
+                ai_res = json.loads(clean_json)
+                if ai_res and "score_ratio" in ai_res:
+                    return ai_res
+            except Exception as e:
+                print(f"[Warning] Grader OpenAI call failed: {e}. Trying Gemini...")
+
+        # 2. Try Google Gemini Multi-Model Failover Rotator
         ai_res = self.gemini_rotator.generate_json(prompt)
         if ai_res and "score_ratio" in ai_res:
             return ai_res
+
+        # 3. Fallback to OpenAI if Gemini failed (and OpenAI wasn't run first)
+        if self.settings.llm_provider.lower() != "openai" and self.settings.openai_api_key:
+            try:
+                from langchain_openai import ChatOpenAI
+                from langchain_core.messages import SystemMessage
+
+                llm = ChatOpenAI(
+                    model=self.settings.llm_model_name,
+                    api_key=self.settings.openai_api_key,
+                    temperature=0.2
+                )
+                res = llm.invoke([SystemMessage(content=prompt)])
+                clean_json = res.content.replace("```json\n", "").replace("```", "").strip()
+                ai_res = json.loads(clean_json)
+                if ai_res and "score_ratio" in ai_res:
+                    return ai_res
+            except Exception as e:
+                print(f"[Warning] Grader OpenAI fallback failed: {e}")
+
         return None
 
     def grade_submission(self, student_id: str, student_name: str, quiz_data: Dict[str, Any], answers: Dict[str, str]) -> Dict[str, Any]:
@@ -78,9 +118,9 @@ TUYỆT ĐỐI KHÔNG bắt buộc sinh viên phải gõ chính xác 100% từng
 
         score_per_question = max_score / len(questions)
 
-        for q in questions:
-            q_id = str(q["id"])
-            user_ans = str(answers.get(q_id, "")).strip()
+        for idx, q in enumerate(questions):
+            q_id = str(q.get("id") or f"Q{idx+1}")
+            user_ans = str(answers.get(q_id, answers.get(f"Q{idx+1}", ""))).strip()
             q_type = q.get("type", "multiple_choice")
             concept = q.get("concept", "Kiến thức chung")
             citation = q.get("citation", "Slide bài giảng")
@@ -161,7 +201,12 @@ TUYỆT ĐỐI KHÔNG bắt buộc sinh viên phải gõ chính xác 100% từng
             total_score += score
             results.append({
                 "question_id": q_id,
+                "question_text": q_text,
+                "question_type": q_type,
                 "concept": concept,
+                "options": q.get("options", []),
+                "correct_answer": correct_opt,
+                "explanation": explanation,
                 "user_answer": user_ans,
                 "score": round(score, 2),
                 "max_score": round(score_per_question, 2),

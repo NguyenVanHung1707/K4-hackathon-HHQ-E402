@@ -51,6 +51,7 @@ Docker sẽ tự động tải các image cần thiết, cài đặt thư viện
 Sau khi lệnh chạy xong, các cổng (port) sẽ được mở:
 - 👉 **Frontend Web Portal (React/Vite):** Truy cập tại **`http://localhost:5173`**
 - 👉 **Backend API Server (FastAPI):** Chạy ngầm tại **`http://localhost:8000`** 
+- 👉 **ChromaDB Vector DB Server:** Chạy tại **`http://localhost:8001`** (Kiểm tra trạng thái tại `http://localhost:8001/api/v2/heartbeat`)
 - 👉 **Swagger API Docs:** Khám phá API tại **`http://localhost:8000/docs`**
 
 *(Khi muốn dừng toàn bộ hệ thống, bạn chỉ cần gõ lệnh: `docker-compose down`)*

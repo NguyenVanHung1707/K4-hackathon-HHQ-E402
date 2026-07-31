@@ -116,7 +116,8 @@ class GeminiMultiModelRotator:
 
             # Direct Google REST API Endpoint (Fast 4s Timeout)
             try:
-                url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={self.api_key}"
+                clean_model_name = model_name.replace("models/", "")
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/{clean_model_name}:generateContent?key={self.api_key}"
                 headers = {"Content-Type": "application/json"}
                 body = {
                     "contents": [{"parts": [{"text": prompt}]}],

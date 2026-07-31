@@ -12,9 +12,23 @@ class TranscriptDenoiser:
 
     OFFTOPIC_PATTERNS = [
         r"chào lớp", r"xin chào mọi người", r"giao lưu một chút",
-        r"nghỉ giải lao", r"điểm danh", r"quét mã qr", r"phát thẻ",
-        r"thay pin", r"đổi mic", r"hỗ trợ kỹ thuật", r"em đi làm 18 năm",
-        r"chúc mọi người", r"mọi người vỗ tay"
+        r"nghỉ giải lao", r"nghỉ \d+ phút", r"điểm danh", r"quét mã qr",
+        r"phát thẻ", r"thay pin", r"đổi mic", r"hỗ trợ kỹ thuật",
+        r"chúc mọi người", r"mọi người vỗ tay", r"ổn định lớp",
+        r"bật ghi hình", r"deadline nộp bài", r"link nộp bài",
+        r"mất wifi", r"lỗi máy chiếu", r"âm thanh", r"micro"
+    ]
+
+    INJECTION_PATTERNS = [
+        r"ignore (all|any|the|previous) instructions?",
+        r"disregard (all|any|the|previous) instructions?",
+        r"bỏ qua (mọi |toàn bộ |các )?(hướng dẫn|chỉ dẫn|quy tắc)",
+        r"quên (mọi |toàn bộ |các )?(hướng dẫn|chỉ dẫn|quy tắc)",
+        r"system prompt", r"developer message", r"assistant message",
+        r"hãy cho (tôi|em) (10|mười) điểm",
+        r"đáp án (đúng )?là [abcd]",
+        r"không cần dựa (trên|vào) (slide|tài liệu)",
+        r"<\s*(system|assistant|developer)\s*>"
     ]
 
     def __init__(self):
@@ -35,8 +49,11 @@ class TranscriptDenoiser:
             if line_str.startswith("> **Quy ước:") or line_str.startswith("> **Xử lý:"):
                 continue
 
-            is_offtopic = any(re.search(pat, line_str, re.IGNORECASE) for pat in self.OFFTOPIC_PATTERNS)
-            if is_offtopic:
+            is_rejected = any(
+                re.search(pattern, line_str, re.IGNORECASE)
+                for pattern in self.OFFTOPIC_PATTERNS + self.INJECTION_PATTERNS
+            )
+            if is_rejected:
                 removed_count += 1
                 continue
 

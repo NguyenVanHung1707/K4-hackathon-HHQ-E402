@@ -20,11 +20,23 @@ class RAGVectorStore:
         # Primary vector storage (ChromaDB) or in-memory fallback
         try:
             import chromadb
-            os.makedirs(self.settings.chroma_db_dir, exist_ok=True)
-            self.chroma_client = chromadb.PersistentClient(path=self.settings.chroma_db_dir)
-            self.slide_collection = self.chroma_client.get_or_create_collection("slide_core")
-            self.transcript_collection = self.chroma_client.get_or_create_collection("transcript_context")
-            print(f"[RAGVectorStore] Initialized ChromaDB at {self.settings.chroma_db_dir}")
+            if self.settings.chroma_server_host:
+                self.chroma_client = chromadb.HttpClient(
+                    host=self.settings.chroma_server_host,
+                    port=self.settings.chroma_server_port
+                )
+                print(f"[RAGVectorStore] Connected to ChromaDB Server at http://{self.settings.chroma_server_host}:{self.settings.chroma_server_port}")
+            else:
+                os.makedirs(self.settings.chroma_db_dir, exist_ok=True)
+                self.chroma_client = chromadb.PersistentClient(path=self.settings.chroma_db_dir)
+                print(f"[RAGVectorStore] Initialized Local ChromaDB at {self.settings.chroma_db_dir}")
+
+            if self.settings.chroma_server_host:
+                self.slide_collection = self.chroma_client.get_or_create_collection("slide_core", embedding_function=None)
+                self.transcript_collection = self.chroma_client.get_or_create_collection("transcript_context", embedding_function=None)
+            else:
+                self.slide_collection = self.chroma_client.get_or_create_collection("slide_core")
+                self.transcript_collection = self.chroma_client.get_or_create_collection("transcript_context")
         except Exception as e:
             print(f"[RAGVectorStore] ChromaDB notice ({e}), using in-memory store.")
             self._slide_memory: List[Dict[str, Any]] = []

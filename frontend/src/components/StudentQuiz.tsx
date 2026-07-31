@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { QuizSetupModal } from './QuizSetupModal';
+import { LessonSummaryModal } from './LessonSummaryModal';
 
 interface StudentQuizProps {
   quizId: string;
@@ -7,6 +8,21 @@ interface StudentQuizProps {
   onBackToPath: () => void;
   onSelectSession?: (sessionId: string) => void;
 }
+
+const cleanQuestionText = (value: unknown): string => {
+  return String(value || '')
+    .replace(
+      /^\s*(?:\[(?:ôn tập|on tap|trắc nghiệm|trac nghiem|điền từ|dien tu|tự luận|tu luan)[^\]]*\]\s*)+/gi,
+      ''
+    )
+    .replace(/^câu hỏi này ôn lại câu bạn đã làm sai:\s*/i, '')
+    .replace(/^cau hoi nay on lai cau ban da lam sai:\s*/i, '')
+    .replace(/^điền lại khái niệm đúng cho câu hỏi cũ:\s*/i, '')
+    .replace(/^dien lai khai niem dung cho cau hoi cu:\s*/i, '')
+    .replace(/^hãy sửa lại câu trả lời.*?:\s*/i, '')
+    .replace(/^hay sua lai cau tra loi.*?:\s*/i, '')
+    .trim();
+};
 
 export const StudentQuiz: React.FC<StudentQuizProps> = ({
   quizId,
@@ -20,6 +36,7 @@ export const StudentQuiz: React.FC<StudentQuizProps> = ({
   const [gradingResult, setGradingResult] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [forbiddenMsg, setForbiddenMsg] = useState<string | null>(null);
+  const [summaryOpen, setSummaryOpen] = useState<boolean>(false);
 
   // Setup Modal State
   const [setupModalOpen, setSetupModalOpen] = useState<boolean>(false);
@@ -46,6 +63,7 @@ export const StudentQuiz: React.FC<StudentQuizProps> = ({
     setSubmitted(false);
     setGradingResult(null);
     setAnswers({});
+    setSummaryOpen(false);
 
     fetch(`/api/student/session/${quizId}/quiz?student_id=${studentProfile.studentId || '2012345'}`)
       .then(async (res) => {
@@ -139,6 +157,15 @@ export const StudentQuiz: React.FC<StudentQuizProps> = ({
 
         <div className="flex items-center gap-3">
           <button
+            onClick={() => setSummaryOpen(true)}
+            className="bg-white text-[#0f2a90] border border-[#2e44a7]/40 w-9 h-9 lg:w-auto lg:px-3.5 rounded-full font-label-caps text-xs font-semibold hover:bg-[#eff4ff] transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+            title="Xem tóm tắt bài học"
+            aria-label="Xem tóm tắt bài học"
+          >
+            <span className="material-symbols-outlined text-base">summarize</span>
+            <span className="hidden lg:inline">Tóm tắt</span>
+          </button>
+          <button
             onClick={() => setSetupModalOpen(true)}
             className="bg-[#eff4ff] text-[#0f2a90] border border-[#2e44a7]/40 px-3.5 py-1.5 rounded-full font-label-caps text-xs font-semibold hover:bg-[#dce9ff] transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
           >
@@ -230,6 +257,13 @@ export const StudentQuiz: React.FC<StudentQuizProps> = ({
 
           {/* Quick Actions at Sidebar Bottom */}
           <div className="pt-3 border-t border-[#e5eeff] space-y-2">
+            <button
+              onClick={() => setSummaryOpen(true)}
+              className="w-full py-2.5 px-3 border border-[#2e44a7]/40 text-[#0f2a90] font-label-caps text-xs font-semibold rounded-xl hover:bg-[#eff4ff] transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-sm">summarize</span>
+              Tóm tắt bài học
+            </button>
             <button
               onClick={() => setSetupModalOpen(true)}
               className="w-full py-2.5 px-3 bg-[#eff4ff] text-[#0f2a90] font-label-caps text-xs font-semibold rounded-xl hover:bg-[#dce9ff] transition-all flex items-center justify-center gap-1.5 cursor-pointer"
@@ -332,7 +366,7 @@ export const StudentQuiz: React.FC<StudentQuizProps> = ({
                       </div>
 
                       <h3 className="font-headline-md text-base font-bold text-[#0b1c30] mb-4">
-                        {q.question_text || q.question}
+                        {cleanQuestionText(q.question_text || q.question)}
                       </h3>
 
                       {/* User Choice vs Correct Choice */}
@@ -370,7 +404,14 @@ export const StudentQuiz: React.FC<StudentQuizProps> = ({
               </div>
 
               {/* Bottom Action Button */}
-              <div className="text-center pt-4">
+              <div className="text-center pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
+                <button
+                  onClick={() => setSetupModalOpen(true)}
+                  className="bg-[#006c49] text-white px-8 py-3.5 rounded-full font-label-caps text-xs font-bold shadow-md hover:bg-[#006c49]/90 transition-all cursor-pointer inline-flex items-center gap-2"
+                >
+                  <span className="material-symbols-outlined text-base">auto_awesome</span>
+                  Sinh bộ câu hỏi mới
+                </button>
                 <button
                   onClick={onBackToPath}
                   className="bg-[#0f2a90] text-white px-8 py-3.5 rounded-full font-label-caps text-xs font-bold shadow-md hover:bg-[#2e44a7] transition-all cursor-pointer"
@@ -412,7 +453,7 @@ export const StudentQuiz: React.FC<StudentQuizProps> = ({
                     </div>
 
                     <h3 className="font-headline-md text-base md:text-lg font-bold text-[#0b1c30] mb-5">
-                      {q.question_text || q.question}
+                      {cleanQuestionText(q.question_text || q.question)}
                     </h3>
 
                     {/* Multiple Choice Options */}
@@ -499,11 +540,29 @@ export const StudentQuiz: React.FC<StudentQuizProps> = ({
         </main>
       </div>
 
+      <LessonSummaryModal
+        isOpen={summaryOpen}
+        sessionId={quizId}
+        studentId={studentProfile.studentId || '2012345'}
+        onClose={() => setSummaryOpen(false)}
+      />
+
       {/* Setup Modal */}
       <QuizSetupModal
         isOpen={setupModalOpen}
+        sessionId={quizId}
+        sessionTitle={quizId}
+        studentId={studentProfile.studentId || '2012345'}
         onClose={() => setSetupModalOpen(false)}
-        onApplySetup={handleApplySetup}
+        onStartQuiz={(data) => {
+          setSetupModalOpen(false);
+          if (data && data.questions) {
+            setQuizData(data);
+            setSubmitted(false);
+            setGradingResult(null);
+            setAnswers({});
+          }
+        }}
       />
     </div>
   );

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { StudentProfile } from '../types';
 import { QuizSetupModal } from './QuizSetupModal';
+import { LessonSummaryModal } from './LessonSummaryModal';
 
 interface LearningPathProps {
   studentProfile: StudentProfile;
@@ -15,6 +16,7 @@ export const LearningPath: React.FC<LearningPathProps> = ({ studentProfile, onSt
   // Setup Modal State
   const [setupModalOpen, setSetupModalOpen] = useState<boolean>(false);
   const [selectedModule, setSelectedModule] = useState<{ id: string; title: string } | null>(null);
+  const [summarySessionId, setSummarySessionId] = useState<string | null>(null);
 
   useEffect(() => {
     fetch(`/api/student/progress?student_id=${studentProfile.studentId || '2012345'}`)
@@ -74,7 +76,7 @@ export const LearningPath: React.FC<LearningPathProps> = ({ studentProfile, onSt
     {
       module_id: 'Day02',
       title: 'Buổi 2 (Day02)',
-      session: 'Day 02: Prompt Engineering, RAG & AI Agent Architectures',
+      session: 'Day 02: Xác định bài toán cho AI & Problem Statement',
       status: 'locked',
       weak_concepts: [],
     },
@@ -186,6 +188,16 @@ export const LearningPath: React.FC<LearningPathProps> = ({ studentProfile, onSt
                       {/* Main Action Buttons */}
                       <div className="space-y-2 mt-2">
                         <button
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            setSummarySessionId(item.module_id);
+                          }}
+                          className="w-full bg-white text-[#0f2a90] border border-[#2e44a7]/40 py-2 rounded-lg font-label-caps text-[11px] font-semibold hover:bg-[#eff4ff] transition-all flex items-center justify-center gap-1 cursor-pointer"
+                        >
+                          <span className="material-symbols-outlined text-sm">summarize</span>
+                          Xem tóm tắt bài học
+                        </button>
+                        <button
                           onClick={() => handleLessonClick(item)}
                           className={`w-full text-white py-2.5 rounded-full font-label-caps text-xs transition-all flex items-center justify-center gap-2 shadow cursor-pointer ${
                             isLocked ? 'bg-[#757684] hover:bg-[#454652]' : 'bg-[#0f2a90] hover:bg-[#2e44a7]'
@@ -216,6 +228,13 @@ export const LearningPath: React.FC<LearningPathProps> = ({ studentProfile, onSt
           )}
         </div>
       </main>
+
+      <LessonSummaryModal
+        isOpen={Boolean(summarySessionId)}
+        sessionId={summarySessionId || ''}
+        studentId={studentProfile.studentId || '2012345'}
+        onClose={() => setSummarySessionId(null)}
+      />
 
       {/* Quiz Setup Modal Component */}
       <QuizSetupModal
