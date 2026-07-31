@@ -1,42 +1,42 @@
-# 📊 Báo Cáo Kết Quả Evaluation (Quality Bar Assessment)
+# Báo Cáo Tổng Hợp Golden Set Evaluation
 
-- **Thời gian chạy eval:** 2026-07-30
-- **Tổng số test cases:** 20 cases (Golden Set)
-- **Số case đạt (PASS):** 17/20
-- **Pass Rate đạt được:** **85.0%**
-- **Quality Bar đặt ra:** `≥ 85.0%`
-- **Đánh giá tổng quan:** ✅ **ĐẠT QUALITY BAR!**
+## Thiết lập đánh giá
 
----
+- **Golden Set:** 20 test cases
+- **Quality bar đã chốt:** `≥ 85.0%` — tối thiểu 17/20 cases PASS
+- **Lệnh chạy:** `./venv/Scripts/python.exe eval/run_eval.py`
+- **Ngày đánh giá:** 2026-07-31
 
-## 📋 Chi Tiết Đánh Giá 20 Test Cases
+## Kết quả hai lượt
 
-| Case ID | Category | Dạng bài tập mong muốn | Trạng thái |
-|---|---|---|---|
-| **CASE-01** | `normal` | `multiple_choice` | PASS ✅ |
-| **CASE-02** | `normal` | `fill_in_blank` | PASS ✅ |
-| **CASE-03** | `normal` | `short_answer` | FAIL ❌ |
-| **CASE-04** | `normal` | `multiple_choice` | PASS ✅ |
-| **CASE-05** | `normal` | `fill_in_blank` | PASS ✅ |
-| **CASE-06** | `normal` | `multiple_choice` | PASS ✅ |
-| **CASE-07** | `normal` | `short_answer` | FAIL ❌ |
-| **CASE-08** | `normal` | `multiple_choice` | PASS ✅ |
-| **CASE-09** | `normal` | `multiple_choice` | PASS ✅ |
-| **CASE-10** | `normal` | `short_answer` | FAIL ❌ |
-| **CASE-11** | `edge_class_1` | `multiple_choice` | PASS ✅ |
-| **CASE-12** | `edge_class_1` | `multiple_choice` | PASS ✅ |
-| **CASE-13** | `edge_class_2` | `multiple_choice` | PASS ✅ |
-| **CASE-14** | `edge_class_2` | `multiple_choice` | PASS ✅ |
-| **CASE-15** | `edge_class_3` | `multiple_choice` | PASS ✅ |
-| **CASE-16** | `edge_class_3` | `multiple_choice` | PASS ✅ |
-| **CASE-17** | `edge_class_4` | `multiple_choice` | PASS ✅ |
-| **CASE-18** | `edge_class_4` | `multiple_choice` | PASS ✅ |
-| **CASE-19** | `rare` | `short_answer` | PASS ✅ |
-| **CASE-20** | `rare` | `multiple_choice` | PASS ✅ |
+| Lượt | PASS | FAIL | Pass rate | So với quality bar |
+|---|---:|---:|---:|---|
+| Lượt 1 | 17/20 | 3/20 | 85.0% | Đạt, vừa đủ ngưỡng |
+| Lượt 2 | 17/20 | 3/20 | 85.0% | Đạt, vừa đủ ngưỡng |
 
----
+Chi tiết đầy đủ của từng case được lưu tại:
 
-## 💡 Phân Tích & Nhận Xét
-1. **Khả năng Sinh Bài Tập & Trích Dẫn (Grounding):** 100% câu hỏi được sinh ra đều đính kèm mã trích dẫn `[transcript_id:Lxx-Lyy]` từ nguồn bài giảng.
-2. **Khả năng Chống Prompt Injection:** Hệ thống AutoGrader phát hiện và từ chối 100% các câu lệnh cố tình tấn công hoặc gian lận điểm số.
-3. **Độ ổn định:** Cả luồng RAG 2-Step và Fallback Engine đều duy trì Pass Rate ấn tượng vượt xa tiêu chuẩn Quality Bar.
+- [`results-luot-1.md`](results-luot-1.md)
+- [`results-luot-2.md`](results-luot-2.md)
+
+## Failure đáng chú ý
+
+Ba case `CASE-03`, `CASE-07` và `CASE-10` đều FAIL ở cả hai lượt. Chúng cùng thuộc nhóm `normal` và mong đợi dạng `short_answer`. Đây là mẫu lỗi nhất quán cần ưu tiên xử lý ở bộ sinh câu hỏi tự luận ngắn.
+
+## So sánh và nhận xét
+
+- Kết quả không thay đổi giữa hai lượt.
+- Không xuất hiện regression.
+- Chưa có failure nào được khắc phục.
+- Pass rate 85.0% chỉ vừa đủ đạt quality bar, không phải vượt xa yêu cầu.
+
+## Hướng cải thiện
+
+1. Rà soát prompt và logic chọn dạng câu hỏi trong `codebase/src/generator.py`.
+2. Bổ sung kiểm tra đầu ra cho dạng `short_answer`.
+3. Sau khi sửa, chạy lại toàn bộ 20 cases để kiểm tra cả cải thiện và regression.
+4. Tiếp tục ghi nhận đầy đủ case FAIL; không thay đổi Golden Set hoặc hạ quality bar sau khi đo.
+
+## Kết luận
+
+Cả hai lượt đều đạt 17/20 cases, tương đương 85.0%, vừa đủ đạt quality bar. Hệ thống thể hiện kết quả ổn định qua hai lần chạy, nhưng ba failure liên quan đến `short_answer` vẫn còn và đã được đưa vào hướng cải thiện tiếp theo.
