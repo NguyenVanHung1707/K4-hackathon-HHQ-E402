@@ -1,71 +1,18 @@
-# 🚀 Hướng Dẫn Vận Hành & Chạy Hệ Thống VLearn EduAI
+# 🚀 Hướng Dẫn Vận Hành & Khởi Chạy Hệ Thống VLearn EduAI Bằng Docker
 
-Tài liệu này hướng dẫn chi tiết các bước cài đặt môi trường ảo Python (`venv`), cài đặt thư viện và khởi chạy từ **CLI Demo**, **Evaluation Suite**, **Backend REST API Server (FastAPI)** đến **Web Frontend (React/Vite)**.
+Hệ thống VLearn EduAI đã được đóng gói hoàn toàn. Bạn **không cần** cài đặt Python, Node.js hay bất kỳ thư viện (`pip`/`npm`) nào. Chỉ với **Docker**, bạn có thể khởi chạy toàn bộ hệ thống (Frontend, Backend, Database) bằng 1 dòng lệnh duy nhất.
 
 ---
 
 ## 📋 1. Yêu Cầu Môi Trường (Prerequisites)
 
-- **Python:** phiên bản `3.10` trở lên (đi kèm `pip` và mô-đun `venv`).
-- **Node.js:** phiên bản `18.0` hoặc `20.0` trở lên (đi kèm `npm`).
+- **Docker Desktop:** Đã được cài đặt và đang chạy trên máy của bạn ([Tải Docker tại đây](https://www.docker.com/products/docker-desktop/)).
 
 ---
 
-## 📦 2. Cài Đặt Môi Trường & Thư Viện (Cài Một Lần Đầu)
+## 🔑 2. Cấu Hình File `.env` (Biến Môi Trường)
 
-Mở Terminal tại thư mục gốc của dự án (`K4-hackathon-HHQ-E402/`) và thực hiện các bước sau:
-
-### 🔹 Bước 2.1: Tạo và Kích Hoạt Môi Trường Ảo (Python venv)
-
-Việc tạo Virtual Environment (`.venv`) giúp cô lập các thư viện của dự án, tránh xung đột hệ thống.
-
-#### 🪟 Trên Windows (PowerShell / Command Prompt):
-```powershell
-# 1. Tạo môi trường ảo tên là .venv
-python -m venv .venv
-
-# 2. Kích hoạt môi trường ảo trên PowerShell
-.venv\Scripts\Activate.ps1
-
-# (Nếu dùng Command Prompt / cmd.exe):
-# .venv\Scripts\activate.bat
-```
-> 💡 *Mẹo trên Windows:* Nếu gặp lỗi `Execution_Policies` khi chạy lệnh Activate trên PowerShell, hãy mở PowerShell bằng quyền Administrator và chạy lệnh:  
-> `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`
-
-#### 🍎 🐧 Trên macOS / Linux / Git Bash:
-```bash
-# 1. Tạo môi trường ảo tên là .venv
-python3 -m venv .venv
-
-# 2. Kích hoạt môi trường ảo
-source .venv/bin/activate
-```
-
----
-
-### 🔹 Bước 2.2: Cài đặt thư viện Backend Python (pip)
-Sau khi đã kích hoạt thành công môi trường ảo `(.venv)`:
-
-```bash
-pip install -r codebase/requirements.txt
-```
-
----
-
-### 🔹 Bước 2.3: Cài đặt thư viện Frontend Web (npm)
-Dự án sử dụng React kết hợp Vite cho tốc độ khởi chạy siêu nhanh.
-```bash
-cd frontend
-npm install
-cd ..
-```
-
----
-
-## 🔑 3. Cấu Hình File `.env` (Biến Môi Trường)
-
-Tạo một file có tên **`.env`** tại thư mục gốc của dự án (hoặc sao chép từ file mẫu `.env.example`):
+Tạo một file có tên **`.env`** tại thư mục gốc của dự án (hoặc đổi tên từ file mẫu `.env.example`):
 
 ```bash
 # Trên Linux/Mac/Git Bash:
@@ -87,53 +34,36 @@ OPENAI_API_KEY=sk-proj-your-openai-api-key-here
 # 3. Độ liều/sáng tạo khi sinh câu hỏi (Mặc định: 0.2)
 TEMPERATURE=0.2
 ```
-> 💡 *Lưu ý:* Hệ thống bắt buộc phải có ít nhất `GEMINI_API_KEY` (hoặc `OPENAI_API_KEY`) để tự động sinh đề bài (Generator) và tự động chấm điểm ngữ nghĩa (Semantic Auto-Grader). Nếu không có, hệ thống sẽ sử dụng fallback tĩnh.
+> 💡 *Lưu ý:* Hệ thống bắt buộc phải có ít nhất `GEMINI_API_KEY` (hoặc `OPENAI_API_KEY`) để tính năng AI sinh đề bài (Generator) và AI chấm tự luận ngữ nghĩa (Semantic Auto-Grader) hoạt động chính xác.
 
 ---
 
-## ⚡ 4. Các Bước Khởi Chạy Hệ Thống
+## 🐳 3. Khởi Chạy Hệ Thống Bằng Docker Compose
 
-### 🔹 Bước 1: Khởi Chạy Backend REST API Server (FastAPI)
-Khởi chạy API Server lắng nghe tại cổng `8000` phục vụ kết nối với Frontend. Đảm bảo bạn đang ở môi trường ảo `.venv`.
+Mở Terminal / Command Prompt / PowerShell tại thư mục gốc của dự án và chạy dòng lệnh sau:
 
 ```bash
-python codebase/src/main.py --server
+docker-compose up -d --build
 ```
-👉 API Server chạy tại: **`http://localhost:8000`**  
-👉 Swagger UI Documentation tương tác tại: **`http://localhost:8000/docs`**
+
+Docker sẽ tự động tải các image cần thiết, cài đặt thư viện ảo bên trong container và khởi chạy hệ thống ở chế độ background. Quá trình này có thể mất 1-2 phút trong lần chạy đầu tiên.
+
+Sau khi lệnh chạy xong, các cổng (port) sẽ được mở:
+- 👉 **Frontend Web Portal (React/Vite):** Truy cập tại **`http://localhost:5173`**
+- 👉 **Backend API Server (FastAPI):** Chạy ngầm tại **`http://localhost:8000`** 
+- 👉 **Swagger API Docs:** Khám phá API tại **`http://localhost:8000/docs`**
+
+*(Khi muốn dừng toàn bộ hệ thống, bạn chỉ cần gõ lệnh: `docker-compose down`)*
 
 ---
 
-### 🔹 Bước 2: Khởi Chạy React Web Frontend (Vite)
-Mở một cửa sổ Terminal mới (không cần active venv) để khởi chạy ứng dụng web:
-
-```bash
-cd frontend
-npm run dev
-```
-👉 Truy cập Giao diện Web Portal tại: **`http://localhost:5173`**
-
----
-
-### 🔹 Bước 3: (Tùy chọn) Chạy CLI Demo Hoặc Evaluation Suite
-Nếu bạn không muốn chạy giao diện web, có thể test trực tiếp qua Terminal:
-```bash
-# Chạy Terminal flow (Demo 1 dòng): Lọc rác -> Sinh Quiz -> Auto Grader -> Report
-python codebase/src/main.py
-
-# Chạy đánh giá chất lượng hệ thống trên 20 test cases
-python eval/run_eval.py
-```
-
----
-
-## 🎯 5. Mô Tả Flow Demo Cho BTC (Bấm gì $\rightarrow$ Gõ gì $\rightarrow$ Ra gì)
+## 🎯 4. Mô Tả Flow Demo Cho BTC (Bấm gì $\rightarrow$ Gõ gì $\rightarrow$ Ra gì)
 
 ### 🖥️ Trên Giao Diện Web (`http://localhost:5173`)
 
 #### 🎓 Luồng 1: Học Viên Làm Bài Quiz (Student Portal)
 - **Bấm gì:** Truy cập `http://localhost:5173` $\rightarrow$ Mở tab **"Học Viên Làm Bài"**.
-- **Gõ gì:** Nhập Họ tên (ví dụ: *Nguyễn Văn A*) & Chọn bài học ở thanh Sidebar.
+- **Gõ gì:** Nhập Họ tên (ví dụ: *Nguyễn Văn A*) & Chọn bài học ở thanh Sidebar (ví dụ: *Day 01*).
 - **Thao tác:** 
   - Chọn đáp án trắc nghiệm **A, B, C, D**.
   - Gõ câu trả lời tự luận ngắn (2-3 câu). AI sẽ chấm điểm dựa trên **ngữ nghĩa (Semantic)** thay vì so khớp chuỗi 100%.
@@ -142,15 +72,18 @@ python eval/run_eval.py
 - **Ra gì:** **Kết quả chấm điểm tức thì**: Điểm tổng /10, Tỷ lệ phần trăm %, Phản hồi từng câu kèm trích dẫn đoạn bài giảng và lời giải thích từ AI Tutor. *(Nếu nộp prompt injection $\rightarrow$ AI nhận diện gian lận, báo lỗi đỏ và tính 0 điểm)*.
 
 #### 📊 Luồng 2: Giảng Viên & TA Quản Lý (Lecturer Dashboard)
-- **Bấm gì:** Quay lại màn hình chọn vai trò $\rightarrow$ Chuyển sang **"Dashboard Giảng Viên"**.
-- **Gõ gì:** Tải lên bài giảng (nhập Text) hoặc dán đoạn transcript vào ô văn bản.
+- **Bấm gì:** Ở góc trái màn hình, bấm nút đổi vai trò $\rightarrow$ Chuyển sang **"Dashboard Giảng Viên"**.
+- **Gõ gì:** Dán đoạn transcript bài giảng vào ô văn bản.
 - **Bấm gì:** Bấm nút **"Lọc Rác Dữ Liệu & Nạp Vector DB"**.
 - **Ra gì:**
-  - **Biểu đồ Bản đồ Lỗ hổng Kiến thức cả lớp:** Thống kê sinh viên nào nắm vững, sinh viên nào đang hổng kiến thức để Giảng viên theo dõi và kèm cặp.
+  - **Biểu đồ Bản đồ Lỗ hổng Kiến thức cả lớp:** Thống kê trực quan sinh viên nào nắm vững, sinh viên nào đang hổng kiến thức để Giảng viên theo dõi và kèm cặp.
+  - Cảnh báo các sinh viên điểm dưới mức trung bình để có kế hoạch hỗ trợ 1-1.
 
 ---
 
-## 🗄️ 6. Cơ Sở Dữ Liệu & Lưu Trữ (Database Structure)
+## 🗄️ 5. Cơ Sở Dữ Liệu & Lưu Trữ Đã Đóng Gói
+
+Hệ thống Docker đã được mount sẵn volume lưu trữ ra ngoài thư mục `data/` của máy thật, vì vậy dữ liệu sẽ **không bị mất** ngay cả khi bạn tắt hay khởi động lại Docker Container:
 
 - **SQLite Database (`data/db/vlearn.db`):** Lưu trữ bền vững Ngân hàng bài tập, cấu hình bài học và Lịch sử bài nộp của học viên.
-- **ChromaDB Vector Store (`data/chroma/`):** Lưu trữ Embeddings tri thức mỏ neo để hệ thống RAG có thể trích xuất chính xác tài liệu học tập, tránh hiện tượng Hallucination.
+- **ChromaDB Vector Store (`data/chroma/`):** Lưu trữ Embeddings tri thức mỏ neo để hệ thống RAG có thể trích xuất chính xác tài liệu học tập.
