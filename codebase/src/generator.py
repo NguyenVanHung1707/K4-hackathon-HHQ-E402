@@ -296,6 +296,15 @@ class QuizGenerator:
             for fp in forbidden_patterns:
                 if fp in q_text:
                     return False
+
+            # Check for hallucinated/broken answers or explanations related to weak concepts
+            ans_lower = str(q.get("correct_answer", "")).strip().lower()
+            exp_lower = str(q.get("explanation", "")).strip().lower()
+            invalid_terms = ["không nắm vững", "đã nắm vững", "lỗi của sinh viên", "hồ sơ năng lực", "học viên bị hổng"]
+            for term in invalid_terms:
+                if term in ans_lower or term in exp_lower:
+                    return False
+
             # Check duplicates
             for aq in accepted:
                 if aq.get("question_text", "").strip().lower() == q.get("question_text", "").strip().lower():
